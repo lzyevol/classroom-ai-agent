@@ -25,9 +25,12 @@ export default function Home() {
         >
           进入智能课堂
         </Link>
-        <span className="rounded-xl border border-zinc-300 px-6 py-3 text-zinc-500 dark:border-zinc-700">
-          练习将在后续阶段开放
-        </span>
+        <Link
+          className="rounded-xl border border-zinc-300 px-6 py-3 font-medium transition hover:border-blue-600 hover:text-blue-700 dark:border-zinc-700"
+          href="/practice"
+        >
+          进入章节练习
+        </Link>
       </div>
     </main>
   );
