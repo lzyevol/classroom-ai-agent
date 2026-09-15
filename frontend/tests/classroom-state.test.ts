@@ -116,5 +116,6 @@ describe("课堂事件状态层", () => {
     expect(interrupted.status).toBe("interrupted");
     expect(interrupted.error).toBe("课堂连接意外中断");
     expect(interrupted.currentMessageId).toBeNull();
+    expect(interrupted.messages[0].status).toBe("interrupted");
   });
 });
