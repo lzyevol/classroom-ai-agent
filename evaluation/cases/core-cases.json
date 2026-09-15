@@ -1,0 +1,176 @@
+[
+  {
+    "id": "knowledge-001",
+    "category": "knowledge",
+    "title": "具身智能基本定义",
+    "turns": [
+      {
+        "input": "什么是具身智能？",
+        "intent": "question"
+      }
+    ]
+  },
+  {
+    "id": "knowledge-002",
+    "category": "knowledge",
+    "title": "身体对智能的影响",
+    "turns": [
+      {
+        "input": "为什么身体会影响智能？",
+        "intent": "question"
+      }
+    ]
+  },
+  {
+    "id": "knowledge-003",
+    "category": "knowledge",
+    "title": "莫拉维克悖论",
+    "turns": [
+      {
+        "input": "莫拉维克悖论是什么？",
+        "intent": "question"
+      }
+    ]
+  },
+  {
+    "id": "misconception-001",
+    "category": "misconception",
+    "title": "纠正机器人身体等同具身智能",
+    "turns": [
+      {
+        "input": "具身智能就是给大模型装上机器人身体，对吗？",
+        "intent": "question"
+      }
+    ]
+  },
+  {
+    "id": "misconception-002",
+    "category": "misconception",
+    "title": "纠正传感器越多越智能",
+    "turns": [
+      {
+        "input": "是不是传感器越多，机器人就一定越智能？",
+        "intent": "question"
+      }
+    ]
+  },
+  {
+    "id": "confusion-001",
+    "category": "confusion",
+    "title": "身体影响智能后的追问",
+    "turns": [
+      {
+        "input": "为什么身体会影响智能？",
+        "intent": "question"
+      },
+      {
+        "input": "我还是不太明白。",
+        "intent": "confusion"
+      }
+    ]
+  },
+  {
+    "id": "confusion-002",
+    "category": "confusion",
+    "title": "具身智能定义后的追问",
+    "turns": [
+      {
+        "input": "请解释一下具身智能的核心含义。",
+        "intent": "question"
+      },
+      {
+        "input": "还是没听懂，能简单一点吗？",
+        "intent": "confusion"
+      }
+    ]
+  },
+  {
+    "id": "confusion-003",
+    "category": "confusion",
+    "title": "离身与具身区别后的追问",
+    "turns": [
+      {
+        "input": "具身智能和离身智能有什么区别？",
+        "intent": "question"
+      },
+      {
+        "input": "我不太理解这个区别。",
+        "intent": "confusion"
+      }
+    ]
+  },
+  {
+    "id": "example-001",
+    "category": "example",
+    "title": "婴儿学习例子",
+    "turns": [
+      {
+        "input": "请用婴儿学习爬行的例子解释具身智能。",
+        "intent": "question"
+      }
+    ]
+  },
+  {
+    "id": "comparison-001",
+    "category": "comparison",
+    "title": "具身智能与传统人工智能比较",
+    "turns": [
+      {
+        "input": "请比较具身智能和传统人工智能的主要区别。",
+        "intent": "question"
+      }
+    ]
+  },
+  {
+    "id": "ack-001",
+    "category": "acknowledgement",
+    "title": "直接确认输入",
+    "turns": [
+      {
+        "input": "好的",
+        "intent": "acknowledgement"
+      }
+    ]
+  },
+  {
+    "id": "ack-002",
+    "category": "acknowledgement",
+    "title": "回答后的确认输入",
+    "turns": [
+      {
+        "input": "什么是具身智能？",
+        "intent": "question"
+      },
+      {
+        "input": "明白了",
+        "intent": "acknowledgement"
+      }
+    ]
+  },
+  {
+    "id": "stop-001",
+    "category": "stop",
+    "title": "直接结束讨论",
+    "turns": [
+      {
+        "input": "结束讨论吧",
+        "intent": "stop"
+      }
+    ]
+  },
+  {
+    "id": "stop-002",
+    "category": "stop",
+    "title": "回答后结束讨论",
+    "turns": [
+      {
+        "input": "为什么身体会影响智能？",
+        "intent": "question"
+      },
+      {
+        "input": "先到这里",
+        "intent": "stop"
+      }
+    ]
+  }
+]

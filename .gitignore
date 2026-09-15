@@ -1,0 +1,73 @@
+.env
+.env.*
+!.env.example
+!.env.docker.example
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Editors and OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Frontend build artifacts
+frontend/.next/
+
+# Temporary files
+.tmp/
+*.part
+*.log
+
+# Local databases and generated course data
+*.db
+*.db-shm
+*.db-wal
+data/**
+!data/README.md
+!data/images/
+!data/images/**
+!data/processed/
+!data/processed/**
+!data/classroom.db
+
+# SQLite runtime sidecars and local recovery snapshots are never shared
+data/classroom.db-shm
+data/classroom.db-wal
+data/local-backups/
+
+# Upstream reference checkout; frontend/ is the maintained application
+OpenMAIC-main/
+
+# Local copy of the collaborator's branch, downloaded rather than cloned. Its
+# code is already merged into this tree; the folder carries its own .git and
+# .env and must never be committed.
+classroom-ai-agent-feature-backend/
+
+# Original OCR exports are local source material
+*_by_PaddleOCR-VL-*.json
+*_by_PaddleOCR-VL-*.md
+
+# Local V2 backend working copy; it is a separate historical checkout and must not be committed.
+classroom-ai-agent-feature-backend-v2/
+
+# Other local backend snapshots and local AI handoff notes are not project source.
+classroom-ai-agent-feature-backend-v1/
+AI_HANDOFF.md
+
+# Archived local snapshots, upstream copies, logs and raw source material are not project runtime.
+archive/legacy-backend/
+archive/upstream/
+archive/handoff/
+archive/logs/
+archive/source-material/ocr/
+
+# Generated outputs and temporary work files
+output/
+tmp/

@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>具身智能课程 · 章节学习页（OpenMAIC 风格）</title>
+<style>
+  :root {
+    --violet-50: #f5f3ff;
+    --violet-100: #ede9fe;
+    --violet-400: #a78bfa;
+    --violet-500: #8b5cf6;
+    --violet-600: #7c3aed;
+    --purple-500: #a855f7;
+    --purple-600: #9333ea;
+    --purple-700: #7e22ce;
+    --indigo-50: #eef2ff;
+    --indigo-100: #e0e7ff;
+    --blue-50: #eff6ff;
+    --emerald-500: #10b981;
+    --red-500: #ef4444;
+    --amber-500: #f59e0b;
+    --gray-50: #fafafa;
+    --gray-100: #f4f4f5;
+    --gray-200: #e4e4e7;
+    --gray-300: #d4d4d8;
+    --gray-400: #a1a1aa;
+    --gray-500: #71717a;
+    --gray-600: #52525b;
+    --gray-700: #3f3f46;
+    --gray-800: #27272a;
+    --gray-900: #18181b;
+    --radius: 0.625rem;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; font-family: 'Inter', -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--gray-50); color: var(--gray-800); font-size: 14px; }
+  body { height: 100vh; overflow: hidden; }
+  button { font-family: inherit; }
+
+  /* 顶层 */
+  .app { height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+  .main { flex: 1; display: flex; overflow: hidden; background: var(--gray-50); }
+
+  /* 左侧栏：Scene Sidebar */
+  aside.scene-sidebar {
+    width: 220px; flex-shrink: 0; border-right: 1px solid rgba(228,228,231,0.6);
+    background: rgba(255,255,255,0.6); backdrop-filter: blur(12px);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .sidebar-header { padding: 14px 16px 10px; border-bottom: 1px solid rgba(228,228,231,0.5); }
+  .sidebar-header .label { font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gray-400); }
+  .sidebar-header .title { font-size: 13px; font-weight: 600; color: var(--gray-800); margin-top: 4px; }
+  .sidebar-list { flex: 1; overflow-y: auto; padding: 12px 10px; }
+  .thumb-item { padding: 8px; border-radius: 10px; cursor: pointer; margin-bottom: 8px; transition: all 0.3s; border: 1px solid transparent; }
+  .thumb-item:hover { background: rgba(139,92,246,0.06); }
+  .thumb-item.active { background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(168,85,247,0.06)); border-color: rgba(139,92,246,0.3); box-shadow: 0 4px 12px -4px rgba(139,92,246,0.25); }
+  .thumb-item.done .thumb-canvas { opacity: 0.55; }
+  .thumb-canvas { aspect-ratio: 16/9; background: #fff; border-radius: 8px; box-shadow: 0 4px 12px -4px rgba(0,0,0,0.08); ring: 1px solid rgba(0,0,0,0.05); padding: 8px; margin-bottom: 6px; overflow: hidden; position: relative; }
+  .thumb-canvas .thumb-title { font-size: 8px; font-weight: 700; color: var(--gray-700); line-height: 1.3; }
+  .thumb-canvas .thumb-bullets { font-size: 6px; color: var(--gray-500); margin-top: 4px; line-height: 1.4; }
+  .thumb-canvas .thumb-num { position: absolute; top: 4px; right: 6px; font-size: 12px; font-weight: 900; color: var(--gray-200); }
+  .thumb-meta { display: flex; align-items: center; justify-content: space-between; padding: 0 2px; }
+  .thumb-meta .name { font-size: 11px; font-weight: 500; color: var(--gray-700); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .thumb-item.active .thumb-meta .name { color: var(--violet-600); font-weight: 600; }
+  .thumb-meta .status { font-size: 10px; color: var(--gray-400); flex-shrink: 0; margin-left: 4px; }
+  .thumb-meta .status.done { color: var(--emerald-500); }
+
+  /* 中间主区 */
+  main.center { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; position: relative; }
+
+  /* Header 80px */
+  header.top-header {
+    height: 80px; padding: 0 32px; display: flex; align-items: center; justify-content: space-between;
+    background: transparent; flex-shrink: 0;
+  }
+  header .brand { display: flex; align-items: center; gap: 12px; }
+  header .back-btn { width: 36px; height: 36px; border-radius: 10px; background: rgba(255,255,255,0.6); border: 1px solid rgba(228,228,231,0.6); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--gray-600); font-size: 16px; transition: all 0.3s; }
+  header .back-btn:hover { background: #fff; color: var(--violet-600); }
+  header .brand .titles { display: flex; flex-direction: column; }
+  header .brand .titles .cur { font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gray-400); }
+  header .brand .titles h1 { font-size: 20px; font-weight: 700; color: var(--gray-800); margin: 2px 0 0; letter-spacing: -0.01em; }
+  header .top-nav {
+    display: flex; align-items: center; gap: 4px;
+    background: rgba(255,255,255,0.6); backdrop-filter: blur(12px);
+    padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(228,228,231,0.6);
+    box-shadow: 0 4px 12px -4px rgba(0,0,0,0.04);
+  }
+  header .top-nav a { padding: 5px 12px; font-size: 12px; font-weight: 500; color: var(--gray-500); border-radius: 999px; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+  header .top-nav a:hover { color: var(--violet-600); }
+  header .top-nav a.active { background: linear-gradient(135deg, var(--violet-500), var(--purple-500)); color: #fff; box-shadow: 0 2px 8px -2px rgba(139,92,246,0.4); }
+  header .action-btn { width: 36px; height: 36px; border-radius: 999px; background: rgba(255,255,255,0.6); backdrop-filter: blur(12px); border: 1px solid rgba(228,228,231,0.6); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+  /* Canvas 舞台 */
+  .canvas-wrap { flex: 1; min-height: 0; padding: 8px 24px 8px; display: flex; align-items: center; justify-content: center; background: rgba(250,250,250,0.4); }
+  .slide-canvas {
+    aspect-ratio: 16/9; height: 100%; max-height: 100%; max-width: 100%;
+    background: #fff; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
+    border-radius: 12px; overflow: hidden;
+    outline: 1px solid rgba(9,9,11,0.05); position: relative;
+  }
+  .slide-num-deco { position: absolute; top: 20px; right: 28px; font-size: 42px; font-weight: 900; color: var(--gray-200); opacity: 0.6; mix-blend-mode: multiply; letter-spacing: -0.03em; }
+  .slide-cite-tag { position: absolute; top: 22px; left: 32px; font-size: 10px; color: var(--gray-400); font-weight: 500; padding: 4px 10px; background: var(--gray-50); border-radius: 999px; }
+  .slide-inner { padding: 60px 70px; height: 100%; display: flex; flex-direction: column; justify-content: center; }
+  .slide-inner .subtitle { font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--violet-500); margin-bottom: 12px; }
+  .slide-inner h1 { font-size: 40px; font-weight: 800; color: var(--gray-900); margin: 0 0 28px; letter-spacing: -0.02em; line-height: 1.15; }
+  .slide-inner ul { list-style: none; padding: 0; margin: 0; }
+  .slide-inner ul li { padding: 10px 0 10px 24px; position: relative; font-size: 17px; line-height: 1.7; color: var(--gray-700); }
+  .slide-inner ul li::before { content: ''; position: absolute; left: 0; top: 22px; width: 8px; height: 8px; border-radius: 50%; background: linear-gradient(135deg, var(--violet-500), var(--purple-500)); }
+  .slide-inner .highlight { background: linear-gradient(120deg, rgba(253,224,71,0.6) 0%, rgba(253,224,71,0.6) 100%); background-repeat: no-repeat; background-size: 100% 40%; background-position: 0 88%; padding: 0 2px; }
+  .slide-inner .entity { color: var(--violet-600); border-bottom: 1.5px dashed var(--violet-500); cursor: pointer; padding-bottom: 1px; font-weight: 500; }
+  .slide-inner .entity:hover { background: var(--violet-50); }
+  .slide-figure { text-align: center; margin: 20px 0; }
+  .slide-figure img { max-height: 240px; border-radius: 10px; box-shadow: 0 10px 25px -8px rgba(0,0,0,0.15); }
+  .slide-figure figcaption { color: var(--gray-500); font-size: 12px; margin-top: 8px; font-weight: 500; }
+  .slide-quote { border-left: 3px solid var(--violet-500); padding: 14px 22px; background: linear-gradient(90deg, rgba(139,92,246,0.06), transparent); border-radius: 0 8px 8px 0; font-size: 16px; color: var(--gray-700); margin: 12px 0; font-style: italic; }
+  .slide-compare { display: flex; gap: 24px; margin-top: 16px; }
+  .slide-compare .col { flex: 1; padding: 24px; border-radius: 16px; background: var(--gray-50); position: relative; }
+  .slide-compare .col.left { border-top: 4px solid var(--amber-500); }
+  .slide-compare .col.right { border-top: 4px solid var(--violet-500); }
+  .slide-compare .col .name { font-size: 22px; font-weight: 800; margin-bottom: 12px; }
+  .slide-compare .col.left .name { color: var(--amber-500); }
+  .slide-compare .col.right .name { color: var(--violet-600); }
+  .slide-compare .col .desc { font-size: 15px; line-height: 1.9; color: var(--gray-700); }
+
+  /* 播放按钮浮层 */
+  .play-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.5); backdrop-filter: blur(4px); cursor: pointer; opacity: 0; pointer-events: none; transition: opacity 0.4s; z-index: 5; }
+  .play-overlay.show { opacity: 1; pointer-events: auto; }
+  .play-btn-big { width: 88px; height: 88px; border-radius: 50%; background: rgba(255,255,255,0.95); box-shadow: 0 4px 30px rgba(147,51,234,0.25); display: flex; align-items: center; justify-content: center; animation: breathing 2.5s ease-in-out infinite; }
+  .play-btn-big svg { fill: var(--violet-600); margin-left: 6px; }
+  @keyframes breathing { 0%,100% { transform: scale(1); box-shadow: 0 4px 30px rgba(147,51,234,0.25); } 50% { transform: scale(1.05); box-shadow: 0 4px 40px rgba(147,51,234,0.4); } }
+
+  /* Roundtable 底部 192px */
+  .roundtable { height: 192px; flex-shrink: 0; border-top: 1px solid rgba(228,228,231,0.5); background: rgba(255,255,255,0.6); backdrop-filter: blur(12px); display: flex; flex-direction: column; }
+
+  /* 顶部工具条 h-8 */
+  .canvas-toolbar { height: 32px; padding: 0 16px; border-bottom: 1px solid rgba(228,228,231,0.35); display: flex; align-items: center; gap: 12px; }
+  .toolbar-page { font-size: 11px; color: var(--gray-500); font-weight: 600; }
+  .toolbar-page b { color: var(--gray-700); }
+  .toolbar-controls { display: inline-flex; align-items: center; gap: 2px; background: rgba(244,244,245,0.6); border-radius: 10px; padding: 2px 4px; height: 26px; margin-left: auto; margin-right: auto; }
+  .toolbar-btn { width: 24px; height: 24px; border: none; background: transparent; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--gray-500); transition: all 0.2s; }
+  .toolbar-btn:hover { background: rgba(113,113,122,0.08); color: var(--gray-700); }
+  .toolbar-btn:active { transform: scale(0.9); }
+  .toolbar-btn.playing { color: var(--violet-600); }
+  .toolbar-divider { width: 1px; height: 12px; background: rgba(228,228,231,0.8); }
+  .toolbar-speed { min-width: 32px; height: 20px; padding: 0 6px; border-radius: 5px; background: transparent; border: none; font-size: 11px; font-weight: 600; color: var(--gray-500); cursor: pointer; }
+  .toolbar-speed.active { color: var(--violet-600); background: rgba(139,92,246,0.1); }
+  .toolbar-right { display: flex; gap: 6px; }
+  .toolbar-tag { font-size: 10px; padding: 3px 8px; border-radius: 999px; background: rgba(16,185,129,0.1); color: var(--emerald-500); font-weight: 600; }
+
+  /* 三栏交互区 */
+  .roundtable-body { flex: 1; display: flex; align-items: stretch; min-height: 0; }
+  .teacher-col { width: 90px; flex-shrink: 0; border-right: 1px solid rgba(228,228,231,0.4); background: linear-gradient(180deg, rgba(245,243,255,0.5), transparent); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 0; position: relative; }
+  .teacher-col .book-icon { position: absolute; top: 12px; font-size: 18px; opacity: 0.1; }
+  .avatar-ring { position: relative; width: 48px; height: 48px; border-radius: 50%; }
+  .avatar-ring .avatar { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, var(--violet-500), var(--purple-600)); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 22px; }
+  .avatar-ring .ring { position: absolute; inset: -3px; border-radius: 50%; border: 2px solid transparent; transition: all 0.3s; }
+  .avatar-ring.speaking .ring { border-color: var(--purple-500); box-shadow: 0 0 12px rgba(168,85,247,0.4); }
+  .avatar-ring .dot { position: absolute; top: 2px; right: 2px; width: 12px; height: 12px; border-radius: 50%; background: var(--emerald-500); border: 2px solid #fff; }
+  .avatar-ring .dot::after { content: ''; position: absolute; inset: 2px; border-radius: 50%; background: #fff; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+  .teacher-col .name-pill { margin-top: 8px; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--gray-200); color: var(--gray-600); background: #fff; }
+
+  .bubble-stage { flex: 1; margin: 8px 12px 12px; border-radius: 40px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.4), rgba(255,255,255,0.8));
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.5);
+    box-shadow: 0 20px 60px -15px rgba(0,0,0,0.05), inset 0 1px 0 0 rgba(255,255,255,0.9);
+    padding: 14px 20px; display: flex; align-items: center; gap: 10px; position: relative; overflow: hidden;
+  }
+  .bubble-avatar-mini { width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, var(--violet-500), var(--purple-600)); flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; box-shadow: 0 2px 6px rgba(139,92,246,0.3); }
+  .bubble-content { flex: 1; padding: 8px 16px; border-radius: 20px; background: #fff; border: 1px solid var(--gray-100); border-bottom-left-radius: 4px; font-size: 14px; line-height: 1.7; color: var(--gray-800); max-width: 78%; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+  .bubble-content .speaking-cursor { display: inline-block; width: 2px; height: 15px; background: var(--violet-500); vertical-align: middle; margin-left: 2px; animation: cursor-blink 1s infinite; }
+  @keyframes cursor-blink { 50% { opacity: 0; } }
+  .wave-bars { display: inline-flex; gap: 3px; align-items: center; margin-left: auto; height: 22px; }
+  .wave-bars span { width: 3px; border-radius: 2px; background: var(--purple-500); animation: bar-wave 1s ease-in-out infinite; }
+  .wave-bars span:nth-child(1) { animation-delay: 0s; }
+  .wave-bars span:nth-child(2) { animation-delay: 0.15s; }
+  .wave-bars span:nth-child(3) { animation-delay: 0.3s; }
+  .wave-bars span:nth-child(4) { animation-delay: 0.45s; }
+  @keyframes bar-wave { 0%,100% { height: 20%; } 50% { height: 100%; } }
+  .wave-bars.paused span { animation-play-state: paused; background: var(--gray-300); }
+
+  .student-col { width: 140px; flex-shrink: 0; border-left: 1px solid rgba(228,228,231,0.4); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 10px; }
+  .student-avatar-row { display: flex; gap: 6px; }
+  .student-avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, #a5b4fc, #818cf8); border: 2px solid #fff; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; opacity: 0.5; filter: grayscale(0.2); transform: scale(0.95); transition: all 0.3s; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+  .student-avatar.active { opacity: 1; transform: scale(1.1); filter: none; border-color: var(--violet-500); box-shadow: 0 0 8px rgba(139,92,246,0.3); }
+  .user-panel { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+  .user-avatar { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--purple-600), var(--violet-600)); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 15px; font-weight: 600; border: 2px solid #fff; box-shadow: 0 4px 12px rgba(139,92,246,0.3); }
+  .icon-btn-mini { width: 30px; height: 30px; border-radius: 50%; background: #fff; border: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--gray-500); transition: all 0.2s; }
+  .icon-btn-mini:hover { border-color: var(--violet-400); color: var(--violet-600); }
+
+  /* 右侧 Chat Area 340px */
+  aside.chat-area {
+    width: 340px; flex-shrink: 0; border-left: 1px solid rgba(228,228,231,0.6);
+    background: rgba(255,255,255,0.6); backdrop-filter: blur(12px);
+    display: flex; flex-direction: column;
+  }
+  .chat-tabs { display: flex; padding: 12px 12px 0; gap: 4px; border-bottom: 1px solid rgba(228,228,231,0.5); }
+  .chat-tab { padding: 8px 14px; font-size: 12px; font-weight: 600; color: var(--gray-500); border-bottom: 2px solid transparent; cursor: pointer; margin-bottom: -1px; transition: all 0.2s; }
+  .chat-tab.active { color: var(--violet-600); border-bottom-color: var(--violet-500); }
+  .chat-ctx-tag { margin-left: auto; margin-bottom: 4px; align-self: center; font-size: 10px; padding: 3px 8px; border-radius: 999px; background: var(--indigo-50); color: var(--violet-600); font-weight: 600; }
+  .chat-list { flex: 1; overflow-y: auto; padding: 16px 14px; }
+  .chat-empty { text-align: center; color: var(--gray-400); padding: 40px 12px; font-size: 12px; line-height: 1.7; }
+  .chat-hint { display: block; margin: 6px 0; padding: 8px 12px; background: #fff; border: 1px solid var(--gray-200); border-radius: 10px; cursor: pointer; text-align: left; font-size: 12px; color: var(--gray-700); transition: all 0.2s; }
+  .chat-hint:hover { border-color: var(--violet-400); color: var(--violet-600); box-shadow: 0 2px 8px -2px rgba(139,92,246,0.15); }
+  .chat-msg { margin-bottom: 12px; display: flex; }
+  .chat-msg.user { justify-content: flex-end; }
+  .chat-bubble { max-width: 90%; padding: 8px 12px; border-radius: 14px; font-size: 12px; line-height: 1.6; }
+  .chat-msg.user .chat-bubble { background: linear-gradient(135deg, var(--purple-600), var(--purple-700)); color: #fff; border-top-right-radius: 4px; box-shadow: 0 4px 12px -4px rgba(147,51,234,0.4); }
+  .chat-msg.ai .chat-bubble { background: #fff; color: var(--gray-800); border: 1px solid var(--gray-100); border-top-left-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); }
+  .chat-msg.ai .conclusion { font-weight: 600; color: var(--gray-900); margin-bottom: 4px; }
+  .chat-msg.ai .related { margin-top: 6px; font-size: 10px; color: var(--gray-500); }
+  .chat-msg.ai .citations { margin-top: 6px; padding-top: 5px; border-top: 1px dashed var(--gray-200); font-size: 10px; color: var(--violet-600); }
+  .chat-msg.ai .actions { margin-top: 6px; font-size: 10px; color: var(--gray-400); display: flex; gap: 10px; }
+  .chat-msg.ai .actions span { cursor: pointer; transition: color 0.2s; }
+  .chat-msg.ai .actions span:hover { color: var(--violet-600); }
+  .interrupt-banner { background: linear-gradient(90deg, rgba(245,158,11,0.1), rgba(245,158,11,0.05)); color: var(--amber-500); text-align: center; font-size: 11px; padding: 6px 10px; border-radius: 8px; margin: 6px 0; font-weight: 600; }
+  .chat-input { border-top: 1px solid rgba(228,228,231,0.5); padding: 12px; display: flex; gap: 8px; }
+  .chat-input input { flex: 1; padding: 8px 12px; background: #fff; border: 1px solid var(--gray-200); border-radius: 10px; font-size: 12px; outline: none; transition: all 0.2s; }
+  .chat-input input:focus { border-color: var(--violet-400); box-shadow: 0 0 0 3px rgba(139,92,246,0.1); }
+  .chat-input button { padding: 0 14px; background: linear-gradient(135deg, var(--violet-500), var(--purple-500)); color: #fff; border: none; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px -4px rgba(139,92,246,0.4); }
+  .chat-input button:hover { transform: translateY(-1px); box-shadow: 0 6px 16px -4px rgba(139,92,246,0.5); }
+
+  /* Quiz overlay - 全屏替换舞台，不是弹窗 */
+  .quiz-view { position: absolute; inset: 0; background: linear-gradient(180deg, var(--gray-50), #fff); display: flex; flex-direction: column; z-index: 4; }
+  .quiz-header { padding: 40px 60px 20px; }
+  .quiz-header .badge { display: inline-block; padding: 6px 14px; background: linear-gradient(135deg, var(--violet-100), var(--indigo-100)); color: var(--violet-600); border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+  .quiz-header h2 { font-size: 32px; font-weight: 800; color: var(--gray-900); margin: 12px 0 0; letter-spacing: -0.02em; }
+  .quiz-body { flex: 1; padding: 20px 60px 40px; display: flex; flex-direction: column; gap: 12px; }
+  .quiz-stem { padding: 20px 24px; background: #fff; border-radius: 16px; border: 1px solid var(--gray-100); position: relative; font-size: 18px; line-height: 1.7; color: var(--gray-800); }
+  .quiz-stem::before { content: ''; position: absolute; left: 0; top: 20px; bottom: 20px; width: 4px; background: var(--violet-400); border-radius: 2px; }
+  .quiz-opts { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+  .quiz-opt { display: flex; align-items: center; gap: 14px; padding: 14px 18px; background: #fff; border: 1px solid var(--gray-200); border-radius: 14px; cursor: pointer; font-size: 15px; color: var(--gray-700); transition: all 0.25s; }
+  .quiz-opt:hover { border-color: var(--violet-400); background: var(--violet-50); }
+  .quiz-opt .letter { width: 28px; height: 28px; border-radius: 50%; background: var(--gray-100); color: var(--gray-500); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .quiz-opt.correct { border-color: #6ee7b7; background: #d1fae5; }
+  .quiz-opt.correct .letter { background: var(--emerald-500); color: #fff; }
+  .quiz-opt.wrong { border-color: #fca5a5; background: #fee2e2; }
+  .quiz-opt.wrong .letter { background: var(--red-500); color: #fff; }
+  .quiz-feedback { margin-top: 8px; padding: 14px 18px; border-radius: 14px; font-size: 14px; line-height: 1.7; }
+  .quiz-feedback.pass { background: linear-gradient(90deg, #d1fae5, #ecfdf5); color: #065f46; border: 1px solid #6ee7b7; }
+  .quiz-feedback.fail { background: linear-gradient(90deg, #fee2e2, #fef2f2); color: #991b1b; border: 1px solid #fca5a5; }
+
+  /* Scroll bar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.2); }
+
+  /* fade in */
+  .fade-in { animation: fadeInUp 0.6s ease-out; }
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="main">
+
+    <!-- 左侧 Scene Sidebar -->
+    <aside class="scene-sidebar">
+      <div class="sidebar-header">
+        <div class="label">Lesson · Chapter 1.1</div>
+        <div class="title">引言 · 什么是具身智能</div>
+      </div>
+      <div class="sidebar-list" id="sidebarList"></div>
+    </aside>
+
+    <!-- 中间主区 -->
+    <main class="center">
+
+      <!-- Header -->
+      <header class="top-header">
+        <div class="brand">
+          <div class="back-btn" title="返回">←</div>
+          <div class="titles">
+            <span class="cur">Current Scene</span>
+            <h1 id="sceneTitle">什么是具身智能</h1>
+          </div>
+        </div>
+        <div class="top-nav">
+          <a class="active">章节学习</a>
+          <a href="demo_qa.html">专门问答</a>
+          <a href="demo_practice.html">章节练习</a>
+          <a>个人中心</a>
+        </div>
+        <div class="action-btn" title="下载">⬇</div>
+      </header>
+
+      <!-- Canvas -->
+      <div class="canvas-wrap">
+        <div class="slide-canvas" id="slideCanvas">
+          <!-- slide inject -->
+        </div>
+      </div>
+
+      <!-- Roundtable -->
+      <div class="roundtable">
+        <div class="canvas-toolbar">
+          <span class="toolbar-page"><b id="pageNow">1</b> / <b id="pageTotal">6</b></span>
+          <div class="toolbar-controls">
+            <button class="toolbar-btn" onclick="prevSlide()" title="上一张">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+            <div class="toolbar-divider"></div>
+            <button class="toolbar-btn playing" id="playBtn" onclick="togglePlay()" title="暂停/播放">
+              <svg id="playIcon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+            </button>
+            <div class="toolbar-divider"></div>
+            <button class="toolbar-btn" onclick="nextSlide()" title="下一张">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+            <div class="toolbar-divider"></div>
+            <button class="toolbar-speed" id="speedBtn" onclick="cycleSpeed()">1x</button>
+          </div>
+          <div class="toolbar-right">
+            <span class="toolbar-tag">● 讲课中</span>
+          </div>
+        </div>
+
+        <div class="roundtable-body">
+          <!-- 左：老师 -->
+          <div class="teacher-col">
+            <div class="book-icon">📖</div>
+            <div class="avatar-ring speaking" id="teacherAvatar">
+              <div class="avatar">🤖</div>
+              <div class="ring"></div>
+              <div class="dot"></div>
+            </div>
+            <div class="name-pill">AI 老师</div>
+          </div>
+
+          <!-- 中：气泡 -->
+          <div class="bubble-stage">
+            <div class="bubble-avatar-mini">🤖</div>
+            <div class="bubble-content" id="narrationBox">
+              <span id="narrationText"></span><span class="speaking-cursor" id="cursor"></span>
+            </div>
+            <div class="wave-bars" id="waveBars"><span></span><span></span><span></span><span></span></div>
+          </div>
+
+          <!-- 右：学生 + 用户 -->
+          <div class="student-col">
+            <div class="student-avatar-row">
+              <div class="student-avatar active">A</div>
+              <div class="student-avatar">B</div>
+              <div class="student-avatar">C</div>
+            </div>
+            <div class="user-panel">
+              <div class="user-avatar">你</div>
+              <div class="icon-btn-mini" title="语音提问">🎤</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- 右侧 Chat -->
+    <aside class="chat-area">
+      <div class="chat-tabs">
+        <div class="chat-tab active">💬 聊天</div>
+        <div class="chat-tab">📚 讲义</div>
+        <div class="chat-ctx-tag" id="ctxTag">Slide 1</div>
+      </div>
+      <div class="chat-list" id="chatList">
+        <div class="chat-empty" id="chatEmpty">
+          听不懂就打断问，AI 老师会暂停讲课
+          <div class="chat-hint" onclick="ask('等等，能再解释一下具身智能是什么吗？')">🖐️ 再解释一下具身智能</div>
+          <div class="chat-hint" onclick="ask('海鞘那段没听懂')">🖐️ 海鞘那段没听懂</div>
+          <div class="chat-hint" onclick="ask('这跟传统 AI 有什么区别？')">🖐️ 这跟传统 AI 什么区别？</div>
+        </div>
+      </div>
+      <div class="chat-input">
+        <input id="chatInput" placeholder="打断提问（会暂停讲课）..." />
+        <button onclick="onSend()">发送</button>
+      </div>
+    </aside>
+
+  </div>
+</div>
+
+<script>
+const IMAGES_BASE = '../data/images/';
+const SLIDES = [
+  {
+    title: '什么是具身智能',
+    subtitle: 'CHAPTER 1.1 · INTRODUCTION',
+    bullets: [
+      '<b>直觉与突破</b>：智能不只来自大脑，身体、运动、感觉都塑造智能',
+      '<b>核心定义</b>：<span class="highlight">"具备了身体的智能"</span> — 身体运动会影响脑的发育与认知',
+      '幼儿通过<span class="entity" data-q="幼儿爬行舔舐说明了什么？">爬行、舔舐</span>与环境交互，促进大脑发育'
+    ],
+    image: { src: IMAGES_BASE + 'page_0017/p0017_b005_image.jpg', caption: '图 1.1 幼儿通过身体与环境的交互促进大脑的发育' },
+    narration: '我们先从一个直觉出发。一提起智能，大家总会想到大脑。但今天要告诉你——大脑并不是智能的唯一来源。身体的结构、运动、感觉，同样在塑造智能。这就是具身智能的核心含义：具备了身体的智能。',
+    cite: '第 1 章 · 1.1 引言'
+  },
+  {
+    title: '一个典型例证：幼儿',
+    subtitle: 'CHAPTER 1.1 · CASE STUDY',
+    bullets: [
+      '婴幼儿并不具备很强的感知与理解能力',
+      '却通过<span class="entity" data-q="爬行舔舐怎么影响大脑">爬行、舔舐等身体行为</span>与环境频繁交互',
+      '这些身体动作 → 大脑不断整合信息 → 逐步形成智能'
+    ],
+    quote: '婴幼儿时期，身体与环境的交互，直接促进大脑的发育。',
+    narration: '举个具体的例子——婴幼儿。他们出生时并不聪明，感知能力也很弱。但你看，他们不停地爬、不停地把东西塞嘴里。这些看起来没意义的动作，恰恰是大脑发育的关键。',
+    cite: '第 1 章 · 1.1 引言'
+  },
+  {
+    title: '反向例证：海鞘',
+    subtitle: 'CHAPTER 1.1 · COUNTER EXAMPLE',
+    bullets: [
+      '海鞘幼仔：拥有<b>复杂神经系统</b>，用于寻找栖息地',
+      '成年海鞘：找到栖息地后定居，<b>不再需要运动</b>',
+      '→ 它会<span class="highlight">主动吃掉自己的大脑</span>，减少能量消耗',
+      '<b>结论</b>：身体运动是智能存在的意义之一'
+    ],
+    narration: '再看一个反着来的例子——海鞘。这个生物很有意思：小时候有复杂的神经系统，用来到处游、寻找栖息地。但一旦它找到地方定居下来，不需要动了——它会把自己的大脑吃掉。这从反面告诉我们：不需要身体运动的地方，大脑就失去了存在的意义。',
+    cite: '第 1 章 · 1.1 引言'
+  },
+  {
+    title: '与传统智能观的对比',
+    subtitle: 'CHAPTER 1.1 · COMPARISON',
+    layout: 'compare',
+    compare: [
+      { name: '离身智能', desc: '智能可以脱离身体存在<br/>强调符号、逻辑、推理<br/>代表：专家系统、下棋 AI' },
+      { name: '具身智能', desc: '脑、身体、环境三者协同<br/>强调感知-动作循环<br/>代表：机器人、自主智能体' }
+    ],
+    narration: '那具身智能和传统的智能观有什么区别？传统上我们说的智能，比如专家系统、下棋程序，都属于离身智能——认为智能可以脱离身体存在。而具身智能强调三个东西的协同：脑、身体、环境。这三者缺一不可。',
+    cite: '第 1 章 · 1.2 具身智能简史',
+    quizAfter: {
+      stem: '关于具身智能的核心观点，以下哪一项正确？',
+      opts: ['智能完全由大脑决定，身体只是执行器', '智能来源于脑、身体、环境三者的协同', '海鞘的例子说明神经系统对智能没有作用', '具身智能否认深度学习的价值'],
+      answer: 1,
+      pass: '答对了。这正是具身智能与传统智能观的核心区别，我们继续下一部分。',
+      fail: '再想想。回顾一下海鞘的例子和"具身"这个词的字面含义。'
+    }
+  },
+  {
+    title: '为什么这个概念今天格外重要',
+    subtitle: 'CHAPTER 1.1 · WHY NOW',
+    bullets: [
+      '大数据 + 深度学习 + 大模型 + GPU → AI 出现新突破',
+      '但大模型仍缺一件事：<span class="highlight">与真实物理世界的身体交互</span>',
+      '机器人、自主驾驶、家庭服务 → 都需要具身能力'
+    ],
+    narration: '你可能会想，现在大模型这么强了，为什么还需要具身智能？因为大模型只会说，不会做。要让 AI 走进真实世界，开车、做家务、操作机器人，就必须给它身体，让它感知、行动。这就是具身智能现在这么火的原因。',
+    cite: '第 1 章 · 1.1 引言'
+  },
+  {
+    title: '本节小结',
+    subtitle: 'CHAPTER 1.1 · SUMMARY',
+    bullets: [
+      '✓ 具身智能 = 具备身体的智能',
+      '✓ 智能 = 脑 + 身体 + 环境 的协同',
+      '✓ 幼儿（正例） vs 海鞘（反例）都印证了这一点',
+      '✓ 大模型时代，具身能力是 AI 落地物理世界的关键'
+    ],
+    narration: '这一节讲完了。总结一下核心观点：具身智能强调身体在智能中的作用；智能来自脑、身体、环境的协同；幼儿和海鞘从正反两面印证。下面进入本节练习，检验你的理解。',
+    cite: '第 1 章 · 1.1 引言'
+  }
+];
+
+let idx = 0, playing = true, timer = null, speedIdx = 1;
+const SPEEDS = [0.8, 1.0, 1.25, 1.5];
+
+function renderSidebar() {
+  document.getElementById('sidebarList').innerHTML = SLIDES.map((s, i) => {
+    const status = i < idx ? 'done' : (i === idx ? 'active' : '');
+    const doneIcon = i < idx ? '<span class="status done">✓</span>' : (s.quizAfter ? '<span class="status">?</span>' : '');
+    return `<div class="thumb-item ${status}" onclick="goSlide(${i})">
+      <div class="thumb-canvas">
+        <div class="thumb-num">${String(i+1).padStart(2,'0')}</div>
+        <div class="thumb-title">${escapeHtml(s.title)}</div>
+        <div class="thumb-bullets">${(s.bullets || []).slice(0,2).map(b => stripTags(b).slice(0,22)).join('<br/>')}</div>
+      </div>
+      <div class="thumb-meta">
+        <span class="name">${String(i+1).padStart(2,'0')} · ${escapeHtml(s.title)}</span>
+        ${doneIcon}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderSlide() {
+  const s = SLIDES[idx];
+  document.getElementById('sceneTitle').textContent = s.title;
+  document.getElementById('pageNow').textContent = idx + 1;
+  document.getElementById('pageTotal').textContent = SLIDES.length;
+  document.getElementById('ctxTag').textContent = `Slide ${idx + 1}`;
+
+  let inner = '';
+  if (s.layout === 'compare') {
+    inner = `
+      <div class="subtitle">${escapeHtml(s.subtitle)}</div>
+      <h1>${escapeHtml(s.title)}</h1>
+      <div class="slide-compare">
+        <div class="col left"><div class="name">${escapeHtml(s.compare[0].name)}</div><div class="desc">${s.compare[0].desc}</div></div>
+        <div class="col right"><div class="name">${escapeHtml(s.compare[1].name)}</div><div class="desc">${s.compare[1].desc}</div></div>
+      </div>`;
+  } else {
+    inner = `<div class="subtitle">${escapeHtml(s.subtitle)}</div><h1>${escapeHtml(s.title)}</h1>`;
+    if (s.bullets) inner += `<ul>${s.bullets.map(b => `<li>${b}</li>`).join('')}</ul>`;
+    if (s.image) inner += `<div class="slide-figure"><img src="${s.image.src}" onerror="this.parentElement.style.display='none'"/><figcaption>${escapeHtml(s.image.caption)}</figcaption></div>`;
+    if (s.quote) inner += `<div class="slide-quote">${escapeHtml(s.quote)}</div>`;
+  }
+
+  document.getElementById('slideCanvas').innerHTML = `
+    <div class="slide-cite-tag">📖 ${escapeHtml(s.cite)}</div>
+    <div class="slide-num-deco">${String(idx+1).padStart(2,'0')}</div>
+    <div class="slide-inner fade-in">${inner}</div>
+  `;
+
+  document.querySelectorAll('.slide-canvas .entity').forEach(el => {
+    el.onclick = () => ask(el.dataset.q);
+  });
+
+  renderSidebar();
+  startNarration(s.narration);
+}
+
+function startNarration(text) {
+  clearInterval(timer);
+  const box = document.getElementById('narrationText');
+  box.textContent = '';
+  let i = 0;
+  const delay = 60 / SPEEDS[speedIdx];
+  timer = setInterval(() => {
+    if (!playing) return;
+    if (i >= text.length) {
+      clearInterval(timer);
+      timer = null;
+      if (SLIDES[idx].quizAfter) {
+        setTimeout(showQuiz, 700);
+      } else {
+        setTimeout(() => { if (playing && idx < SLIDES.length - 1) nextSlide(); }, 1200);
+      }
+      return;
+    }
+    box.textContent += text[i++];
+  }, delay);
+}
+
+function goSlide(i) {
+  if (i < 0 || i >= SLIDES.length) return;
+  idx = i;
+  renderSlide();
+}
+function nextSlide() { if (idx < SLIDES.length - 1) goSlide(idx + 1); }
+function prevSlide() { if (idx > 0) goSlide(idx - 1); }
+function togglePlay() {
+  playing = !playing;
+  const btn = document.getElementById('playBtn');
+  const icon = document.getElementById('playIcon');
+  if (playing) {
+    btn.classList.add('playing');
+    icon.innerHTML = '<rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/>';
+    document.getElementById('waveBars').classList.remove('paused');
+    document.getElementById('teacherAvatar').classList.add('speaking');
+    document.getElementById('cursor').style.display = '';
+    if (!timer) startNarration(SLIDES[idx].narration);
+  } else {
+    btn.classList.remove('playing');
+    icon.innerHTML = '<polygon points="6 4 20 12 6 20 6 4"/>';
+    document.getElementById('waveBars').classList.add('paused');
+    document.getElementById('teacherAvatar').classList.remove('speaking');
+    document.getElementById('cursor').style.display = 'none';
+  }
+}
+function cycleSpeed() {
+  speedIdx = (speedIdx + 1) % SPEEDS.length;
+  const btn = document.getElementById('speedBtn');
+  const v = SPEEDS[speedIdx];
+  btn.textContent = (v === 1 ? '1x' : v + 'x');
+  btn.classList.toggle('active', v !== 1);
+  if (playing) startNarration(SLIDES[idx].narration);
+}
+
+function ask(q) {
+  document.getElementById('chatInput').value = q;
+  onSend();
+}
+function onSend() {
+  const input = document.getElementById('chatInput');
+  const q = input.value.trim();
+  if (!q) return;
+  input.value = '';
+  if (playing) togglePlay();
+  const list = document.getElementById('chatList');
+  const empty = document.getElementById('chatEmpty');
+  if (empty) empty.remove();
+  list.innerHTML += `<div class="interrupt-banner">🖐️ 学生举手，AI 老师暂停讲课</div>`;
+  list.innerHTML += `<div class="chat-msg user"><div class="chat-bubble">${escapeHtml(q)}</div></div>`;
+  list.innerHTML += `<div class="chat-msg ai" id="typing"><div class="chat-bubble" style="color:#a1a1aa; font-style:italic;">AI 老师思考中...</div></div>`;
+  list.scrollTop = list.scrollHeight;
+
+  setTimeout(() => {
+    document.getElementById('typing')?.remove();
+    const a = mockAnswer(q);
+    list.innerHTML += `<div class="chat-msg ai"><div class="chat-bubble">
+      <div class="conclusion">${escapeHtml(a.conclusion)}</div>
+      <div>${escapeHtml(a.detail)}</div>
+      <div class="related">相关知识点：${a.related.join(' · ')}</div>
+      <div class="citations">📖 ${escapeHtml(a.cite)}</div>
+      <div class="actions"><span>👍 有帮助</span><span>👎 没帮助</span><span onclick="togglePlay()">▶ 继续听课</span></div>
+    </div></div>`;
+    list.scrollTop = list.scrollHeight;
+  }, 800);
+}
+
+function mockAnswer(q) {
+  const cite = SLIDES[idx].cite;
+  if (q.includes('海鞘')) return {
+    conclusion: '海鞘的例子是"反向印证"：不需要运动的时候，大脑就没有存在的必要。',
+    detail: '海鞘小时候有复杂神经系统用于游动觅栖息地，一旦定居就把大脑吃掉减少能耗。这说明智能与身体运动是深度绑定的。',
+    related: ['具身智能', '生物具身智能'],
+    cite
+  };
+  if (q.includes('具身智能') || q.includes('再解释')) return {
+    conclusion: '一句话：具身智能 = 具备了身体的智能，认为智能来自脑、身体、环境三者的协同。',
+    detail: '换个说法，传统 AI 认为智能"住在大脑里"，具身智能认为智能"住在身体和环境的互动里"。',
+    related: ['离身智能', '感知-动作循环', '智能体'],
+    cite
+  };
+  if (q.includes('传统') || q.includes('区别')) return {
+    conclusion: '关键区别：是否承认身体在智能形成中的作用。',
+    detail: '传统 AI 关注符号、逻辑、推理，代表是专家系统和下棋程序；具身智能强调感知-动作循环，代表是机器人、自主智能体。',
+    related: ['莫拉维克悖论', '离身智能'],
+    cite
+  };
+  return {
+    conclusion: '当前 Slide 的教材范围内没有充分依据来回答这个问题。',
+    detail: '建议在专门问答页发起深入提问，或点击 Slide 里带下划线的知识点。',
+    related: [],
+    cite
+  };
+}
+
+function showQuiz() {
+  const q = SLIDES[idx].quizAfter;
+  if (!q) return;
+  playing = false;
+  document.getElementById('playBtn').classList.remove('playing');
+  document.getElementById('playIcon').innerHTML = '<polygon points="6 4 20 12 6 20 6 4"/>';
+  document.getElementById('waveBars').classList.add('paused');
+  document.getElementById('teacherAvatar').classList.remove('speaking');
+
+  const canvas = document.getElementById('slideCanvas');
+  const view = document.createElement('div');
+  view.className = 'quiz-view fade-in';
+  view.innerHTML = `
+    <div class="quiz-header">
+      <span class="badge">Quick Check</span>
+      <h2>${escapeHtml('课中小测')}</h2>
+    </div>
+    <div class="quiz-body">
+      <div class="quiz-stem">${escapeHtml(q.stem)}</div>
+      <div class="quiz-opts" id="quizOpts">
+        ${q.opts.map((o, i) => `<div class="quiz-opt" data-i="${i}">
+          <div class="letter">${String.fromCharCode(65+i)}</div>
+          <div>${escapeHtml(o)}</div>
+        </div>`).join('')}
+      </div>
+      <div id="quizFb"></div>
+    </div>
+  `;
+  canvas.appendChild(view);
+
+  view.querySelectorAll('.quiz-opt').forEach(el => {
+    el.onclick = () => {
+      const i = parseInt(el.dataset.i);
+      const correct = i === q.answer;
+      view.querySelectorAll('.quiz-opt').forEach(e => e.onclick = null);
+      el.classList.add(correct ? 'correct' : 'wrong');
+      if (!correct) view.querySelector(`.quiz-opt[data-i="${q.answer}"]`).classList.add('correct');
+      view.querySelector('#quizFb').innerHTML = `<div class="quiz-feedback ${correct ? 'pass' : 'fail'}">${escapeHtml(correct ? q.pass : q.fail)}</div>`;
+      setTimeout(() => {
+        view.remove();
+        playing = true;
+        document.getElementById('playBtn').classList.add('playing');
+        document.getElementById('playIcon').innerHTML = '<rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/>';
+        document.getElementById('waveBars').classList.remove('paused');
+        document.getElementById('teacherAvatar').classList.add('speaking');
+        if (correct) {
+          nextSlide();
+        } else {
+          startNarration('好，我再讲一遍。' + SLIDES[idx].narration);
+        }
+      }, 2000);
+    };
+  });
+}
+
+function escapeHtml(s) { return String(s || '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
+function stripTags(s) { return String(s || '').replace(/<[^>]+>/g, ''); }
+
+document.getElementById('chatInput').addEventListener('keydown', e => { if (e.key === 'Enter') onSend(); });
+
+renderSlide();
+</script>
+
+</body>
+</html>

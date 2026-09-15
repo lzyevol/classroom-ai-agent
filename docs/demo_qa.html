@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>具身智能课程 · 专门问答页原型</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; font-family: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: #f5f6f8; color: #24292f; }
+  body { display: flex; flex-direction: column; height: 100vh; }
+  header { background: #1f2937; color: #fff; padding: 10px 20px; display: flex; align-items: center; gap: 20px; font-size: 14px; }
+  header .title { font-weight: 600; font-size: 16px; }
+  header nav a { color: #d1d5db; margin-right: 16px; text-decoration: none; font-size: 13px; }
+  header nav a.active { color: #fff; border-bottom: 2px solid #6366f1; padding-bottom: 4px; }
+
+  main { flex: 1; display: flex; overflow: hidden; }
+
+  /* 左：会话列表 */
+  aside.sessions { width: 260px; background: #fafbfc; border-right: 1px solid #e5e7eb; display: flex; flex-direction: column; }
+  .sessions-header { padding: 12px 16px; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; gap: 8px; }
+  .sessions-header button { flex: 1; padding: 6px 10px; background: #4f46e5; color: #fff; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; }
+  .sessions-list { flex: 1; overflow-y: auto; padding: 8px 0; }
+  .session-item { padding: 10px 16px; cursor: pointer; font-size: 13px; border-left: 3px solid transparent; }
+  .session-item:hover { background: #eef2ff; }
+  .session-item.active { background: #eef2ff; border-left-color: #4f46e5; }
+  .session-item .title { font-weight: 500; color: #1f2937; margin-bottom: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .session-item .meta { color: #9ca3af; font-size: 11px; }
+
+  /* 中：对话区 */
+  section.chat { flex: 1; display: flex; flex-direction: column; background: #fff; }
+  .chat-header { padding: 14px 24px; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; gap: 16px; }
+  .chat-header .title { font-weight: 600; font-size: 15px; }
+  .scope-picker { margin-left: auto; font-size: 13px; color: #6b7280; }
+  .scope-picker select { border: 1px solid #d1d5db; padding: 4px 8px; border-radius: 4px; font-size: 13px; margin-left: 8px; }
+  .chat-body { flex: 1; overflow-y: auto; padding: 20px 40px; }
+  .msg { margin-bottom: 20px; display: flex; gap: 12px; }
+  .msg.user { flex-direction: row-reverse; }
+  .msg .avatar { width: 32px; height: 32px; border-radius: 50%; background: #e5e7eb; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; }
+  .msg.user .avatar { background: #4f46e5; color: #fff; }
+  .msg.ai .avatar { background: #10b981; color: #fff; }
+  .msg .bubble { max-width: 70%; padding: 12px 16px; border-radius: 10px; background: #f9fafb; border: 1px solid #e5e7eb; font-size: 14px; line-height: 1.75; }
+  .msg.user .bubble { background: #4f46e5; color: #fff; border-color: #4f46e5; }
+  .msg .conclusion { font-weight: 600; margin-bottom: 6px; color: #1f2937; }
+  .msg .related { margin-top: 10px; font-size: 12px; color: #6b7280; }
+  .msg .related .tag { display: inline-block; padding: 2px 8px; border: 1px solid #d1d5db; border-radius: 999px; margin-right: 4px; cursor: pointer; background: #fff; }
+  .msg .related .tag:hover { border-color: #4f46e5; color: #4f46e5; }
+  .msg .citations { margin-top: 12px; padding-top: 10px; border-top: 1px dashed #e5e7eb; font-size: 12px; }
+  .msg .citations .cite { color: #4f46e5; cursor: pointer; }
+  .msg .citations .cite:hover { text-decoration: underline; }
+  .msg .actions { margin-top: 10px; font-size: 12px; color: #9ca3af; }
+  .msg .actions span { cursor: pointer; margin-right: 12px; }
+  .msg .actions span:hover { color: #4f46e5; }
+  .msg .cta { margin-top: 12px; }
+  .msg .cta button { padding: 6px 12px; background: #fff; border: 1px solid #4f46e5; color: #4f46e5; border-radius: 6px; font-size: 12px; cursor: pointer; }
+  .msg .cta button:hover { background: #4f46e5; color: #fff; }
+  .empty { color: #9ca3af; text-align: center; padding: 60px 20px; font-size: 14px; }
+
+  .chat-input { border-top: 1px solid #e5e7eb; padding: 14px 24px; display: flex; gap: 10px; background: #fff; }
+  .chat-input input { flex: 1; border: 1px solid #d1d5db; border-radius: 6px; padding: 10px 14px; font-size: 14px; outline: none; }
+  .chat-input input:focus { border-color: #4f46e5; }
+  .chat-input button { background: #4f46e5; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; font-size: 14px; cursor: pointer; }
+
+  /* 右：教材原文预览侧栏 */
+  aside.preview { width: 340px; background: #fafbfc; border-left: 1px solid #e5e7eb; overflow-y: auto; padding: 16px; display: none; }
+  aside.preview.show { display: block; }
+  .preview-header { font-size: 13px; color: #6b7280; margin-bottom: 8px; display: flex; align-items: center; }
+  .preview-header .close { margin-left: auto; cursor: pointer; }
+  .preview-body { background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px 14px; font-size: 13px; line-height: 1.8; color: #374151; }
+  .preview-body .cite-label { color: #4f46e5; font-size: 12px; margin-bottom: 6px; font-weight: 500; }
+
+  .typing { color: #9ca3af; font-style: italic; }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="title">🎓 具身智能课程</span>
+  <nav>
+    <a href="demo_prototype.html">章节学习</a>
+    <a class="active">专门问答</a>
+    <a href="demo_practice.html">章节练习</a>
+    <a>个人中心</a>
+  </nav>
+</header>
+
+<main>
+  <aside class="sessions">
+    <div class="sessions-header">
+      <button onclick="newSession()">+ 新对话</button>
+    </div>
+    <div class="sessions-list" id="sessionsList"></div>
+  </aside>
+
+  <section class="chat">
+    <div class="chat-header">
+      <span class="title" id="chatTitle">新对话</span>
+      <span class="scope-picker">
+        锚定范围
+        <select id="scopeSelect" onchange="onScopeChange()">
+          <option value="">全书</option>
+          <option value="1">仅第 1 章 · 具身智能概述</option>
+          <option value="1.1">仅 1.1 引言</option>
+          <option value="1.2">仅 1.2 具身智能简史</option>
+          <option value="1.5">仅 1.5 优点/缺点/难点</option>
+        </select>
+      </span>
+    </div>
+    <div class="chat-body" id="chatBody">
+      <div class="empty">
+        选左侧对话开始，或点击「+ 新对话」<br/>
+        <br/>
+        锚定范围会让 AI 在检索时优先命中该范围的教材内容。
+      </div>
+    </div>
+    <div class="chat-input">
+      <input id="input" placeholder="输入问题，回车发送..." disabled />
+      <button id="sendBtn" onclick="onSend()" disabled>发送</button>
+    </div>
+  </section>
+
+  <aside class="preview" id="preview">
+    <div class="preview-header">
+      📖 教材原文预览
+      <span class="close" onclick="closePreview()">✕</span>
+    </div>
+    <div class="preview-body" id="previewBody"></div>
+  </aside>
+</main>
+
+<script>
+const IMAGES_BASE = '../data/images/';
+
+// 预置三个会话（模拟历史）
+const initSessions = [
+  { id: 's1', title: '关于具身智能的基本概念', scope: '1', updated: '刚刚', messages: [
+    { role: 'user', text: '什么是具身智能？' },
+    { role: 'ai', ans: {
+      conclusion: '具身智能是指"具备了身体的智能"，核心是身体本身的运动会影响脑的发育与认知。',
+      detail: '和只强调大脑的传统智能观不同，具身智能认为智能来源于脑、身体、环境三者的协同。婴幼儿通过爬行、舔舐等身体交互促进大脑发育，就是最典型的例证。',
+      related: [{name:'离身智能',q:'什么是离身智能？'}, {name:'智能体',q:'智能体的定义是什么？'}, {name:'感知-动作循环',q:'什么是感知-动作循环？'}],
+      citations: [{ label:'《具身智能导论》第1章 1.1 引言', chunk_id:'c1', quote:'一提起"智能"，人们总是不由自主地想起"大脑"。确实，大脑对于智能的形成具有至关重要的作用。但大脑并非智能的唯一来源，身体的结构、运动和感觉同样会直接影响智能的形成。具身智能，顾名思义就是"具备了身体的智能"…' }]
+    }},
+    { role: 'user', text: '那它和离身智能的区别是什么？' },
+    { role: 'ai', ans: {
+      conclusion: '关键区别在于是否承认身体在智能形成中的作用。离身智能认为智能可以脱离身体存在，强调符号表示和逻辑推理；具身智能认为智能由脑、身体、环境三者协同产生。',
+      detail: '离身智能是符号主义/GOFAI 的传统立场，代表工作是专家系统、下棋程序等。具身智能则受到心理学、生物学的启发，从莫拉维克悖论提出后开始受到广泛关注：机器易于胜任高级推理，反而做不好人类幼儿都能做的抓握与行走。',
+      related: [{name:'莫拉维克悖论',q:'莫拉维克悖论是什么？'}, {name:'符号主义',q:'什么是符号主义 AI？'}],
+      citations: [{ label:'《具身智能导论》第1章 1.2 具身智能简史', chunk_id:'c2', quote:'现代人工智能起源于 20 世纪 50 年代的达特茅斯会议。在此之后的一段时间内，主流人工智能的研究主要基于符号处理形式（也称为离身智能）…' }]
+    }}
+  ]},
+  { id: 's2', title: '莫拉维克悖论与相关辨析', scope: '1.2', updated: '2 小时前', messages: [] },
+  { id: 's3', title: '具身智能的优缺点比较', scope: '1.5', updated: '昨天', messages: [] },
+];
+
+let sessions = [...initSessions];
+let currentId = null;
+
+function renderSessions() {
+  const list = document.getElementById('sessionsList');
+  list.innerHTML = sessions.map(s => `
+    <div class="session-item ${s.id === currentId ? 'active' : ''}" onclick="openSession('${s.id}')">
+      <div class="title">${escapeHtml(s.title)}</div>
+      <div class="meta">范围: ${s.scope || '全书'} · ${s.updated}</div>
+    </div>
+  `).join('');
+}
+
+function openSession(id) {
+  currentId = id;
+  const s = sessions.find(x => x.id === id);
+  document.getElementById('chatTitle').textContent = s.title;
+  document.getElementById('scopeSelect').value = s.scope || '';
+  document.getElementById('input').disabled = false;
+  document.getElementById('sendBtn').disabled = false;
+  renderSessions();
+  renderMessages(s.messages);
+}
+
+function newSession() {
+  const id = 'new-' + Date.now();
+  const s = { id, title: '新对话', scope: '', updated: '刚刚', messages: [] };
+  sessions.unshift(s);
+  openSession(id);
+}
+
+function renderMessages(msgs) {
+  const body = document.getElementById('chatBody');
+  if (!msgs.length) {
+    body.innerHTML = '<div class="empty">开始提问吧。回答会带教材依据，可点击查看原文。</div>';
+    return;
+  }
+  body.innerHTML = msgs.map(m => renderMsg(m)).join('');
+  body.scrollTop = body.scrollHeight;
+}
+
+function renderMsg(m) {
+  if (m.role === 'user') {
+    return `<div class="msg user"><div class="avatar">你</div><div class="bubble">${escapeHtml(m.text)}</div></div>`;
+  }
+  const a = m.ans;
+  const related = a.related.map(r => `<span class="tag" onclick="ask('${escapeAttr(r.q)}')">${escapeHtml(r.name)}</span>`).join('');
+  const cites = a.citations.map((c, i) =>
+    `<div><span class="cite" onclick='showPreview(${JSON.stringify(c).replace(/'/g,"&#39;")})'>📖 ${escapeHtml(c.label)}</span></div>`
+  ).join('');
+  const knowKey = escapeAttr(a.conclusion.slice(0, 15));
+  return `<div class="msg ai"><div class="avatar">AI</div><div class="bubble">
+    <div class="conclusion">${escapeHtml(a.conclusion)}</div>
+    <div>${escapeHtml(a.detail)}</div>
+    <div class="related">相关知识点：${related}</div>
+    <div class="citations">教材依据：${cites}</div>
+    <div class="cta"><button onclick="alert('跳转到练习页并针对该知识点出 3 道题（原型演示）')">🎯 针对这个知识点出 3 道题</button></div>
+    <div class="actions"><span>👍 有帮助</span><span>👎 没帮助</span><span>💬 继续追问</span></div>
+  </div></div>`;
+}
+
+function ask(q) {
+  if (!currentId) newSession();
+  document.getElementById('input').value = q;
+  onSend();
+}
+
+function onSend() {
+  const input = document.getElementById('input');
+  const q = input.value.trim();
+  if (!q || !currentId) return;
+  input.value = '';
+  const s = sessions.find(x => x.id === currentId);
+  s.messages.push({ role: 'user', text: q });
+  // 如果是新对话，用第一句问话当标题
+  if (s.title === '新对话') { s.title = q.length > 20 ? q.slice(0, 20) + '…' : q; renderSessions(); document.getElementById('chatTitle').textContent = s.title; }
+  renderMessages(s.messages);
+
+  // typing
+  const body = document.getElementById('chatBody');
+  body.innerHTML += `<div class="msg ai" id="typing"><div class="avatar">AI</div><div class="bubble typing">正在检索教材...</div></div>`;
+  body.scrollTop = body.scrollHeight;
+
+  setTimeout(() => {
+    document.getElementById('typing')?.remove();
+    const ans = mockAnswer(q);
+    s.messages.push({ role: 'ai', ans });
+    renderMessages(s.messages);
+  }, 800);
+}
+
+function mockAnswer(q) {
+  if (q.includes('莫拉维克')) return {
+    conclusion: '莫拉维克悖论指出：实现高级逻辑推理只需极少的计算资源，而实现感知、运动等低等智慧却需要巨大的计算资源。',
+    detail: '这一悖论由汉斯·莫拉维克等人在 20 世纪 80 年代提出。它揭示了传统 AI 长期忽视身体维度的问题：机器擅长下棋、证明定理，却做不好人类幼儿都能完成的抓握、行走。这也是具身智能存在的理论基础之一。',
+    related: [{name:'具身智能',q:'什么是具身智能？'}, {name:'感知-动作',q:'什么是感知-动作循环？'}],
+    citations: [{ label:'《具身智能导论》第1章 1.2 具身智能简史', chunk_id:'c3', quote:'汉斯·莫拉维克、马文·闵斯基、汉斯·莫拉维克在 20 世纪 80 年代提出，实现高级智慧只需要相对较少的计算资源，实现感知、运动等低等智慧却需要巨大的计算资源。'}]
+  };
+  if (q.includes('海鞘')) return {
+    conclusion: '海鞘的例子说明身体与运动对智能的形成至关重要——不需要运动时，大脑就失去了存在的意义。',
+    detail: '海鞘幼仔拥有复杂的神经系统，用于寻找栖息地；一旦定居下来不再需要移动，成年海鞘会主动将自己的大脑吃掉以减少能耗。这从反面印证了具身智能的核心观点。',
+    related: [{name:'具身智能',q:'什么是具身智能？'}],
+    citations: [{ label:'《具身智能导论》第1章 1.1 引言', chunk_id:'c4', quote:'海鞘幼仔拥有复杂的神经系统，但成年之后却变得更加简单。海鞘一生都在为寻找一块完美的栖息地而努力…' }]
+  };
+  if (q.includes('优点') || q.includes('缺点')) return {
+    conclusion: '具身智能的优点是"主动"，可通过身体运动降低任务难度；缺点是"安全"，身体动作可能带来物理风险；难点是"复杂"，需要处理脑-身体-环境三者的协同。',
+    detail: '优点：从背面识别物体时，具身智能可以让智能体绕到正面，任务变简单。缺点：过度强调身体行为可能忽视决策安全性。难点：三者协同的建模远比单纯的算法优化复杂。',
+    related: [{name:'离身智能',q:'什么是离身智能？'}],
+    citations: [{ label:'《具身智能导论》第1章 1.5 优点、缺点与难点', chunk_id:'c5', quote:'正如深度学习的优点是效果好（"大力出奇迹"）…对于具身智能，也应该明晰它的优点、缺点与难点…' }]
+  };
+  return {
+    conclusion: '当前课程资料中未找到充分依据。',
+    detail: '建议缩小范围、换个说法，或点击相关知识点标签重新提问。',
+    related: [{name:'具身智能',q:'什么是具身智能？'}, {name:'莫拉维克悖论',q:'莫拉维克悖论是什么？'}],
+    citations: []
+  };
+}
+
+function onScopeChange() {
+  if (!currentId) return;
+  const s = sessions.find(x => x.id === currentId);
+  s.scope = document.getElementById('scopeSelect').value;
+  renderSessions();
+}
+
+function showPreview(c) {
+  const p = document.getElementById('preview');
+  p.classList.add('show');
+  document.getElementById('previewBody').innerHTML = `
+    <div class="cite-label">${escapeHtml(c.label)}</div>
+    <div>${escapeHtml(c.quote)}</div>
+  `;
+}
+function closePreview() { document.getElementById('preview').classList.remove('show'); }
+
+function escapeHtml(s) { return String(s || '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
+function escapeAttr(s) { return String(s || '').replace(/'/g, "\\'"); }
+
+document.getElementById('input').addEventListener('keydown', e => { if (e.key === 'Enter') onSend(); });
+
+renderSessions();
+openSession('s1');
+</script>
+</body>
+</html>

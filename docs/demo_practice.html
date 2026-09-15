@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>具身智能课程 · 章节练习页原型</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; font-family: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: #f5f6f8; color: #24292f; }
+  header { background: #1f2937; color: #fff; padding: 10px 20px; display: flex; align-items: center; gap: 20px; font-size: 14px; }
+  header .title { font-weight: 600; font-size: 16px; }
+  header nav a { color: #d1d5db; margin-right: 16px; text-decoration: none; font-size: 13px; }
+  header nav a.active { color: #fff; border-bottom: 2px solid #6366f1; padding-bottom: 4px; }
+  main { max-width: 900px; margin: 0 auto; padding: 24px; }
+
+  /* 步骤指示器 */
+  .steps { display: flex; align-items: center; margin-bottom: 24px; }
+  .step { display: flex; align-items: center; color: #9ca3af; font-size: 13px; }
+  .step .num { width: 24px; height: 24px; border-radius: 50%; background: #e5e7eb; color: #6b7280; display: flex; align-items: center; justify-content: center; margin-right: 6px; font-weight: 600; font-size: 12px; }
+  .step.active { color: #4f46e5; font-weight: 600; }
+  .step.active .num { background: #4f46e5; color: #fff; }
+  .step.done .num { background: #10b981; color: #fff; }
+  .step.done { color: #10b981; }
+  .step-line { width: 40px; height: 2px; background: #e5e7eb; margin: 0 8px; }
+  .step-line.done { background: #10b981; }
+
+  .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 24px; margin-bottom: 16px; }
+  .card h2 { margin: 0 0 16px; font-size: 18px; }
+  .card h3 { margin: 0 0 12px; font-size: 15px; color: #374151; }
+  .form-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; font-size: 14px; }
+  .form-row label { width: 90px; color: #6b7280; }
+  .form-row select, .form-row input[type=number] { border: 1px solid #d1d5db; border-radius: 6px; padding: 6px 10px; font-size: 14px; min-width: 200px; }
+  .chip-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip { padding: 6px 14px; border: 1px solid #d1d5db; border-radius: 999px; cursor: pointer; font-size: 13px; background: #fff; }
+  .chip.on { background: #4f46e5; color: #fff; border-color: #4f46e5; }
+  .btn { padding: 8px 20px; border: 1px solid #d1d5db; background: #fff; border-radius: 6px; cursor: pointer; font-size: 14px; }
+  .btn-primary { background: #4f46e5; color: #fff; border-color: #4f46e5; }
+  .btn-primary:hover { background: #4338ca; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .actions-row { display: flex; justify-content: space-between; margin-top: 20px; }
+
+  /* 题目页 */
+  .question-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; font-size: 13px; color: #6b7280; }
+  .question-header .badge { padding: 2px 10px; border-radius: 4px; font-size: 12px; }
+  .badge.type { background: #eef2ff; color: #4f46e5; }
+  .badge.diff-easy { background: #d1fae5; color: #059669; }
+  .badge.diff-mid { background: #fef3c7; color: #d97706; }
+  .badge.diff-hard { background: #fee2e2; color: #dc2626; }
+  .badge.kp { background: #f3f4f6; color: #374151; }
+  .stem { font-size: 15px; line-height: 1.8; margin-bottom: 20px; }
+  .options { list-style: none; padding: 0; margin: 0; }
+  .options li { padding: 12px 16px; border: 1px solid #e5e7eb; border-radius: 6px; margin-bottom: 8px; cursor: pointer; font-size: 14px; }
+  .options li:hover { border-color: #4f46e5; background: #fafbff; }
+  .options li.selected { border-color: #4f46e5; background: #eef2ff; }
+  .options li .idx { display: inline-block; width: 22px; height: 22px; border-radius: 50%; background: #f3f4f6; color: #6b7280; text-align: center; line-height: 22px; margin-right: 10px; font-size: 12px; font-weight: 600; }
+  .options li.selected .idx { background: #4f46e5; color: #fff; }
+  textarea { width: 100%; min-height: 140px; border: 1px solid #d1d5db; border-radius: 6px; padding: 12px; font-size: 14px; font-family: inherit; resize: vertical; outline: none; }
+  textarea:focus { border-color: #4f46e5; }
+
+  .progress-bar { display: flex; gap: 6px; }
+  .progress-bar .dot { width: 26px; height: 26px; border-radius: 50%; background: #e5e7eb; color: #6b7280; text-align: center; line-height: 26px; font-size: 12px; font-weight: 600; cursor: pointer; }
+  .progress-bar .dot.done { background: #10b981; color: #fff; }
+  .progress-bar .dot.current { background: #4f46e5; color: #fff; }
+
+  /* 结果页 */
+  .result-summary { display: flex; gap: 20px; margin-bottom: 20px; }
+  .kpi { flex: 1; text-align: center; padding: 16px; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; }
+  .kpi .num { font-size: 28px; font-weight: 700; color: #4f46e5; }
+  .kpi .label { font-size: 13px; color: #6b7280; margin-top: 4px; }
+  .mastery-tag { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 13px; margin-left: 8px; }
+  .mastery-good { background: #d1fae5; color: #059669; }
+  .mastery-basic { background: #fef3c7; color: #d97706; }
+  .mastery-none { background: #fee2e2; color: #dc2626; }
+
+  .q-result { border-left: 4px solid #e5e7eb; padding: 14px 18px; background: #fafbfc; border-radius: 0 6px 6px 0; margin-bottom: 14px; }
+  .q-result.correct { border-color: #10b981; }
+  .q-result.wrong { border-color: #ef4444; }
+  .q-result .row { margin-top: 8px; font-size: 13px; color: #6b7280; }
+  .q-result .row b { color: #374151; }
+  .q-result .your { color: #dc2626; }
+  .q-result .correct-ans { color: #059669; }
+  .q-result .cite { color: #4f46e5; cursor: pointer; }
+  .q-result .cite:hover { text-decoration: underline; }
+  .q-result .rubric { margin-top: 10px; padding: 10px 12px; background: #fff; border-radius: 4px; border: 1px solid #e5e7eb; }
+  .rubric-item { padding: 4px 0; font-size: 13px; }
+  .rubric-item .check { display: inline-block; width: 18px; }
+  .rubric-item.covered .check { color: #10b981; }
+  .rubric-item.missing .check { color: #ef4444; }
+  .review-note { background: #fef3c7; padding: 10px 12px; border-radius: 4px; font-size: 13px; color: #92400e; margin-top: 8px; }
+
+  .recommend { background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); color: #fff; padding: 20px; border-radius: 8px; margin-top: 20px; }
+  .recommend h3 { color: #fff; margin: 0 0 12px; }
+  .recommend .reco-item { background: rgba(255,255,255,0.15); padding: 12px 14px; border-radius: 6px; margin-bottom: 8px; font-size: 14px; }
+  .recommend .reco-item .cause { font-size: 12px; opacity: 0.85; margin-top: 4px; }
+  .recommend .reco-btn { display: inline-block; margin-top: 8px; padding: 4px 12px; background: #fff; color: #4f46e5; border-radius: 4px; font-size: 12px; cursor: pointer; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="title">🎓 具身智能课程</span>
+  <nav>
+    <a href="demo_prototype.html">章节学习</a>
+    <a href="demo_qa.html">专门问答</a>
+    <a class="active">章节练习</a>
+    <a>个人中心</a>
+  </nav>
+</header>
+
+<main>
+  <div class="steps" id="steps">
+    <div class="step active" id="step-1"><span class="num">1</span>选择</div>
+    <div class="step-line"></div>
+    <div class="step" id="step-2"><span class="num">2</span>作答</div>
+    <div class="step-line"></div>
+    <div class="step" id="step-3"><span class="num">3</span>批改结果</div>
+  </div>
+
+  <!-- Step 1: 选择 -->
+  <div id="page-1">
+    <div class="card">
+      <h2>📝 生成章节练习</h2>
+      <div class="form-row">
+        <label>章节</label>
+        <select id="chSel">
+          <option value="1.1">1.1 引言</option>
+          <option value="1.2" selected>1.2 具身智能简史</option>
+          <option value="1.5">1.5 优点、缺点与难点</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>知识点</label>
+        <select>
+          <option>全部</option>
+          <option>莫拉维克悖论</option>
+          <option>具身智能</option>
+          <option>离身智能</option>
+        </select>
+      </div>
+      <div class="form-row" style="align-items: flex-start;">
+        <label style="margin-top: 8px;">题型</label>
+        <div class="chip-group" id="typeChips">
+          <div class="chip on" data-t="single">单选</div>
+          <div class="chip on" data-t="judge">判断</div>
+          <div class="chip" data-t="fill">填空</div>
+          <div class="chip on" data-t="short">简答</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>难度</label>
+        <div class="chip-group" id="diffChips">
+          <div class="chip" data-d="easy">简单</div>
+          <div class="chip on" data-d="mid">中等</div>
+          <div class="chip" data-d="hard">困难</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>数量</label>
+        <input type="number" value="3" min="1" max="20" id="numInput" />
+      </div>
+      <div class="actions-row">
+        <span></span>
+        <button class="btn btn-primary" onclick="startPractice()">🎯 生成并开始</button>
+      </div>
+    </div>
+    <div class="card" style="background: #fafbfc;">
+      <h3>💡 说明</h3>
+      <ul style="color:#6b7280; font-size:13px; line-height:1.8; margin:0; padding-left:20px;">
+        <li>题目由 AI 从教材内容生成，每道题都有教材依据可追溯</li>
+        <li>客观题秒判分，简答题由 AI 按评分点批改</li>
+        <li>批改结果会更新你在该章节的知识点掌握度</li>
+        <li>连续答错或低正确率会触发复习推荐</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Step 2: 作答 -->
+  <div id="page-2" style="display: none;">
+    <div class="card">
+      <div class="question-header">
+        <span>第 <b id="qIdx">1</b> 题 / 共 <b id="qTotal">3</b> 题</span>
+        <div class="progress-bar" id="progressBar" style="margin-left: auto;"></div>
+      </div>
+      <div id="questionBody"></div>
+      <div class="actions-row">
+        <button class="btn" onclick="prevQ()" id="prevBtn">← 上一题</button>
+        <div>
+          <button class="btn" onclick="nextQ()" id="nextBtn">下一题 →</button>
+          <button class="btn btn-primary" onclick="submitAll()" id="submitBtn" style="display:none;">提交批改</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: 结果 -->
+  <div id="page-3" style="display: none;">
+    <div class="card">
+      <h2>📊 批改结果</h2>
+      <div class="result-summary">
+        <div class="kpi"><div class="num" id="scoreNum">—</div><div class="label">得分（满分 100）</div></div>
+        <div class="kpi"><div class="num" id="correctNum">—</div><div class="label">正确题数</div></div>
+        <div class="kpi"><div class="num" id="rateNum">—</div><div class="label">正确率</div></div>
+      </div>
+      <div style="font-size:14px;">
+        本节掌握等级：<span class="mastery-tag mastery-basic" id="masteryTag">基本掌握</span>
+        <span style="color:#6b7280;">（由掌握度阈值规则计算，不由 AI 决定）</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>题目详情</h3>
+      <div id="resultList"></div>
+    </div>
+
+    <div class="recommend">
+      <h3>💡 学习推荐</h3>
+      <div id="recoList"></div>
+    </div>
+
+    <div class="actions-row">
+      <button class="btn" onclick="location.reload()">再来一组</button>
+      <div>
+        <button class="btn">📖 错题本</button>
+        <button class="btn btn-primary">下一节 →</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+// mock 题目集（真接口下由 question_gen_service 生成 + 缓存在 question 表）
+const QUESTIONS = [
+  {
+    id: 'q1', type: 'single', difficulty: 'mid', kp: '莫拉维克悖论',
+    stem: '莫拉维克悖论的核心含义是：',
+    options: [
+      '所有智能行为都必须依赖身体运动',
+      '实现高级推理容易，实现感知与运动困难',
+      '深度学习完全解决了具身智能的所有问题',
+      '大脑是智能的唯一来源'
+    ],
+    answer: 1,
+    citation: '《具身智能导论》第1章 1.2 具身智能简史',
+    quote: '汉斯·莫拉维克等人在 20 世纪 80 年代提出，实现高级智慧只需要相对较少的计算资源，实现感知、运动等低等智慧却需要巨大的计算资源。'
+  },
+  {
+    id: 'q2', type: 'judge', difficulty: 'easy', kp: '具身智能',
+    stem: '具身智能强调智能来源于脑、身体、环境三者的协同。（判断对错）',
+    options: ['正确', '错误'],
+    answer: 0,
+    citation: '《具身智能导论》第1章 1.1 引言',
+    quote: '具身智能广泛存在于植物、动物等生物体中，强调智能受脑、身体与环境协同影响。'
+  },
+  {
+    id: 'q3', type: 'short', difficulty: 'mid', kp: '海鞘/具身智能',
+    stem: '简述海鞘的例子如何说明"身体活动与智能的关系"。要求答出：海鞘的行为特征、大脑处理方式、对具身智能观点的印证。',
+    rubric: [
+      { text: '提到海鞘幼仔有复杂神经系统，用于寻找栖息地', weight: 30 },
+      { text: '提到成年海鞘定居后不再需要运动', weight: 30 },
+      { text: '提到成年海鞘会"吃掉自己的大脑"以减少能耗', weight: 20 },
+      { text: '得出结论：身体运动对智能的形成至关重要', weight: 20 }
+    ],
+    answer: '海鞘幼仔拥有复杂神经系统用于寻找栖息地。一旦定居下来不再需要运动，成年海鞘会主动将自己的大脑吃掉以减少能量消耗。这从反面印证了具身智能的观点：不需要身体运动时，大脑就失去了存在的意义。',
+    citation: '《具身智能导论》第1章 1.1 引言'
+  }
+];
+
+let currentIdx = 0;
+let userAnswers = QUESTIONS.map(() => null);
+
+function goto(page) {
+  for (let i = 1; i <= 3; i++) {
+    document.getElementById('page-' + i).style.display = 'none';
+    document.getElementById('step-' + i).classList.remove('active', 'done');
+  }
+  for (let i = 1; i < page; i++) document.getElementById('step-' + i).classList.add('done');
+  document.getElementById('page-' + page).style.display = 'block';
+  document.getElementById('step-' + page).classList.add('active');
+  document.querySelectorAll('.step-line').forEach((el, i) => el.classList.toggle('done', i + 1 < page));
+}
+
+function startPractice() {
+  document.getElementById('qTotal').textContent = QUESTIONS.length;
+  currentIdx = 0;
+  goto(2);
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[currentIdx];
+  document.getElementById('qIdx').textContent = currentIdx + 1;
+  renderProgress();
+  const diffLabel = { easy: '简单', mid: '中等', hard: '困难' }[q.difficulty];
+  const typeLabel = { single: '单选题', judge: '判断题', fill: '填空题', short: '简答题' }[q.type];
+  let html = `
+    <div class="question-header">
+      <span class="badge type">${typeLabel}</span>
+      <span class="badge diff-${q.difficulty}">${diffLabel}</span>
+      <span class="badge kp">📌 ${q.kp}</span>
+    </div>
+    <div class="stem">${escapeHtml(q.stem)}</div>
+  `;
+  if (q.type === 'single' || q.type === 'judge') {
+    html += '<ul class="options">' + q.options.map((op, i) =>
+      `<li class="${userAnswers[currentIdx] === i ? 'selected' : ''}" onclick="selectOption(${i})">
+        <span class="idx">${String.fromCharCode(65 + i)}</span>${escapeHtml(op)}
+      </li>`
+    ).join('') + '</ul>';
+  } else if (q.type === 'short') {
+    html += `<textarea placeholder="在此作答，AI 会按评分点批改..." onchange="userAnswers[${currentIdx}] = this.value">${escapeHtml(userAnswers[currentIdx] || '')}</textarea>`;
+  }
+  document.getElementById('questionBody').innerHTML = html;
+  document.getElementById('prevBtn').disabled = currentIdx === 0;
+  document.getElementById('nextBtn').style.display = currentIdx < QUESTIONS.length - 1 ? 'inline-block' : 'none';
+  document.getElementById('submitBtn').style.display = currentIdx === QUESTIONS.length - 1 ? 'inline-block' : 'none';
+}
+
+function renderProgress() {
+  document.getElementById('progressBar').innerHTML = QUESTIONS.map((_, i) => {
+    const cls = i === currentIdx ? 'current' : (userAnswers[i] !== null ? 'done' : '');
+    return `<div class="dot ${cls}" onclick="jump(${i})">${i + 1}</div>`;
+  }).join('');
+}
+function jump(i) { currentIdx = i; renderQuestion(); }
+function selectOption(i) { userAnswers[currentIdx] = i; renderQuestion(); }
+function prevQ() { if (currentIdx > 0) { currentIdx--; renderQuestion(); } }
+function nextQ() { if (currentIdx < QUESTIONS.length - 1) { currentIdx++; renderQuestion(); } }
+
+function submitAll() {
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'AI 批改中...';
+  setTimeout(() => {
+    goto(3);
+    renderResult();
+  }, 1000);
+}
+
+function renderResult() {
+  // mock 批改
+  let totalScore = 0, correctCount = 0;
+  const results = QUESTIONS.map((q, i) => {
+    const ua = userAnswers[i];
+    if (q.type === 'single' || q.type === 'judge') {
+      const correct = ua === q.answer;
+      if (correct) { totalScore += 30; correctCount++; }
+      return { q, ua, correct, score: correct ? 30 : 0, isSubjective: false };
+    } else {
+      // 简答题 mock：默认给部分分
+      const uaText = ua || '';
+      const covered = q.rubric.map(r => uaText.length > 20 && Math.random() > 0.3);
+      const score = q.rubric.reduce((s, r, idx) => s + (covered[idx] ? r.weight : 0), 0);
+      const reviewRequired = uaText.length < 30;
+      totalScore += Math.floor(score * 0.4); // 简答满分 40
+      const fullScore = Math.floor(score * 0.4);
+      if (fullScore >= 30) correctCount++;
+      return { q, ua: uaText, correct: fullScore >= 30, score: fullScore, isSubjective: true, covered, reviewRequired };
+    }
+  });
+
+  const rate = Math.round(correctCount / QUESTIONS.length * 100);
+  document.getElementById('scoreNum').textContent = totalScore;
+  document.getElementById('correctNum').textContent = `${correctCount} / ${QUESTIONS.length}`;
+  document.getElementById('rateNum').textContent = rate + '%';
+
+  const masteryTag = document.getElementById('masteryTag');
+  if (rate >= 80) { masteryTag.className = 'mastery-tag mastery-good'; masteryTag.textContent = '掌握良好'; }
+  else if (rate >= 60) { masteryTag.className = 'mastery-tag mastery-basic'; masteryTag.textContent = '基本掌握'; }
+  else { masteryTag.className = 'mastery-tag mastery-none'; masteryTag.textContent = '未掌握'; }
+
+  document.getElementById('resultList').innerHTML = results.map((r, i) => renderResultItem(r, i)).join('');
+  document.getElementById('recoList').innerHTML = buildRecommendations(results).map(r => `
+    <div class="reco-item">
+      <div><b>${escapeHtml(r.action)}</b></div>
+      <div class="cause">触发原因：${escapeHtml(r.cause)}</div>
+      <a class="reco-btn" onclick="alert('跳转到' + '${r.target}' + '（原型演示）')">${r.btn}</a>
+    </div>
+  `).join('');
+}
+
+function renderResultItem(r, i) {
+  const q = r.q;
+  const label = q.type === 'short' ? '简答题' : (q.type === 'judge' ? '判断题' : '单选题');
+  let inner = `<div><b>${i + 1}. [${label}] ${escapeHtml(q.stem.split('（')[0])}</b>
+    <span style="float:right; color:${r.correct ? '#059669' : '#dc2626'}; font-weight:600;">${r.score} 分</span></div>`;
+  if (!r.isSubjective) {
+    inner += `<div class="row">你的答案：<span class="${r.correct ? 'correct-ans' : 'your'}">${q.options[r.ua] || '（未作答）'}</span></div>`;
+    if (!r.correct) inner += `<div class="row">正确答案：<span class="correct-ans">${q.options[q.answer]}</span></div>`;
+  } else {
+    inner += `<div class="row">你的答案：<br/><span style="color:#374151;">${escapeHtml(r.ua || '（未作答）')}</span></div>`;
+    inner += `<div class="rubric"><b style="font-size:13px;">评分点覆盖：</b>` + q.rubric.map((rb, idx) =>
+      `<div class="rubric-item ${r.covered[idx] ? 'covered' : 'missing'}"><span class="check">${r.covered[idx] ? '✓' : '✗'}</span>${escapeHtml(rb.text)}（${rb.weight}分）</div>`
+    ).join('') + '</div>';
+    inner += `<div class="row">参考答案：<br/><span style="color:#059669;">${escapeHtml(q.answer)}</span></div>`;
+    if (r.reviewRequired) inner += `<div class="review-note">⚠ AI 置信度较低，已标记为「待教师复核」，最终分数以教师确认为准。</div>`;
+  }
+  inner += `<div class="row">教材依据：<span class="cite" onclick="alert('跳转到教材位置：' + '${q.citation}')">📖 ${escapeHtml(q.citation)}</span></div>`;
+  return `<div class="q-result ${r.correct ? 'correct' : 'wrong'}">${inner}</div>`;
+}
+
+function buildRecommendations(results) {
+  const wrong = results.filter(r => !r.correct);
+  const recs = [];
+  if (wrong.length >= 2) {
+    recs.push({
+      action: `重新学习「${wrong[0].q.kp}」相关内容`,
+      cause: `本次连续答错 ${wrong.length} 道相关题，正确率仅 ${Math.round((results.length - wrong.length) / results.length * 100)}%`,
+      target: '章节页 1.2',
+      btn: '📖 去复习这一节'
+    });
+  }
+  if (wrong.length === 0) {
+    recs.push({
+      action: '进入下一节 1.3「典型的具身智能任务」',
+      cause: '本节正确率 100%，已达掌握良好等级',
+      target: '章节页 1.3',
+      btn: '➡ 下一节'
+    });
+  } else {
+    recs.push({
+      action: '针对错题，用同知识点重新出 3 道类似题',
+      cause: '巩固错题涉及的知识点',
+      target: '练习页',
+      btn: '🎯 换一组类似题'
+    });
+  }
+  return recs;
+}
+
+function escapeHtml(s) { return String(s || '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
+
+// 初始化题型/难度 chip 交互
+document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => c.classList.toggle('on')));
+</script>
+</body>
+</html>
