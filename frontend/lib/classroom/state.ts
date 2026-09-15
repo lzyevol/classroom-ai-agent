@@ -20,7 +20,7 @@ export interface ClassroomMessage {
   agentAvatar?: string;
   agentColor?: string;
   content: string;
-  status: "streaming" | "complete";
+  status: "streaming" | "complete" | "interrupted";
 }
 
 export interface ClassroomCue {
@@ -172,12 +172,7 @@ export function reduceClassroomEvent(
       };
 
     case "error":
-      return {
-        ...state,
-        status: "error",
-        currentMessageId: null,
-        error: event.data.message,
-      };
+      return markClassroomFailed(state, event.data.message);
   }
 }
 
@@ -197,5 +192,27 @@ export function markClassroomInterrupted(
     status: "interrupted",
     currentMessageId: null,
     error: message,
+    messages: state.messages.map((classroomMessage) =>
+      classroomMessage.status === "streaming"
+        ? { ...classroomMessage, status: "interrupted" }
+        : classroomMessage,
+    ),
+  };
+}
+
+export function markClassroomFailed(
+  state: ClassroomState,
+  message: string,
+): ClassroomState {
+  return {
+    ...state,
+    status: "error",
+    currentMessageId: null,
+    error: message,
+    messages: state.messages.map((classroomMessage) =>
+      classroomMessage.status === "streaming"
+        ? { ...classroomMessage, status: "interrupted" }
+        : classroomMessage,
+    ),
   };
 }

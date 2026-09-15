@@ -1,6 +1,6 @@
 import type { StatelessEvent } from "@/lib/sse/types";
 
-export const normalClassroomEvents = [
+export const normalClassroomEvents: StatelessEvent[] = [
   {
     type: "agent_start",
     data: {
@@ -36,7 +36,7 @@ export const normalClassroomEvents = [
       sessionStatus: "waiting_for_user",
     },
   },
-] satisfies StatelessEvent[];
+];
 
 export const classroomErrorEvent = {
   type: "error",
