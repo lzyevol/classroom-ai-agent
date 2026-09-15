@@ -11,6 +11,7 @@ import type {
   PracticeSubmission,
   SubmitPracticeRequest,
 } from "@/lib/practice/types";
+import { parsePracticeSession, parsePracticeSubmission } from "@/lib/practice/validate";
 
 const PRACTICE_URL = "/backend/api/practice";
 
@@ -65,7 +66,7 @@ export async function generatePractice(
   if (!response.ok) {
     throw await responseToApiError(response, `创建练习失败（${response.status}）`);
   }
-  return (await response.json()) as PracticeSession;
+  return parsePracticeSession(await response.json());
 }
 
 export async function submitPractice(
@@ -92,5 +93,5 @@ export async function submitPractice(
   if (!response.ok) {
     throw await responseToApiError(response, `提交练习失败（${response.status}）`);
   }
-  return (await response.json()) as PracticeSubmission;
+  return parsePracticeSubmission(await response.json());
 }

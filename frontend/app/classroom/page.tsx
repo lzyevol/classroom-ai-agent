@@ -2,10 +2,16 @@
 
 import Link from "next/link";
 import { FormEvent, useRef, useState } from "react";
+import { RequestDiagnostic } from "@/components/request-diagnostic";
 import {
   createMockClassroomResponse,
   type MockClassroomScenario,
 } from "@/lib/classroom/mock-client";
+import {
+  ClassroomActionExecutor,
+  type ActionExecutionResult,
+  type WhiteboardSnapshot,
+} from "@/lib/classroom/action-executor";
 import {
   createInitialClassroomState,
   markClassroomFailed,
@@ -14,6 +20,11 @@ import {
 } from "@/lib/classroom/state";
 import { SSEInterruptedError, SSEProtocolError } from "@/lib/sse/errors";
 import { parseSSEStream } from "@/lib/sse/parser";
+import {
+  diagnosticFromError,
+  type RequestDiagnostic as Diagnostic,
+} from "@/lib/diagnostics/request";
+import { redactSensitiveText } from "@/lib/security/redact";
 
 const statusText = {
   idle: "等待开始",
@@ -32,6 +43,13 @@ export default function ClassroomPage() {
   const [state, setState] = useState(createInitialClassroomState);
   const [loading, setLoading] = useState(false);
   const controllerRef = useRef<AbortController | null>(null);
+  const actionExecutorRef = useRef(new ClassroomActionExecutor());
+  const [actionResults, setActionResults] = useState<ActionExecutionResult[]>([]);
+  const [whiteboard, setWhiteboard] = useState<WhiteboardSnapshot>({
+    open: false,
+    elements: [],
+  });
+  const [diagnostic, setDiagnostic] = useState<Diagnostic | null>(null);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -43,13 +61,36 @@ export default function ClassroomPage() {
     setLoading(true);
     setLastInput(normalizedInput);
     setState({ ...createInitialClassroomState(), status: "streaming" });
+    actionExecutorRef.current.reset();
+    setActionResults([]);
+    setWhiteboard(actionExecutorRef.current.getSnapshot());
+    setDiagnostic({ operation: "classroom.stream", mode: "mock", status: "running" });
 
     try {
       const response = createMockClassroomResponse(scenario);
+      let streamFailed = false;
       for await (const streamEvent of parseSSEStream(response, controller.signal)) {
+        if (streamEvent.type === "action") {
+          const execution = actionExecutorRef.current.execute(streamEvent.data);
+          setActionResults((current) => [...current, execution]);
+          setWhiteboard(actionExecutorRef.current.getSnapshot());
+        }
+        if (streamEvent.type === "error") {
+          streamFailed = true;
+          setDiagnostic({
+            operation: "classroom.stream",
+            mode: "mock",
+            status: "stream_error",
+            detail: redactSensitiveText(streamEvent.data.message),
+          });
+        }
         setState((current) => reduceClassroomEvent(current, streamEvent));
       }
+      if (!streamFailed) {
+        setDiagnostic({ operation: "classroom.stream", mode: "mock", status: "completed" });
+      }
     } catch (error) {
+      setDiagnostic(diagnosticFromError("classroom.stream", "mock", error));
       if (error instanceof DOMException && error.name === "AbortError") {
         setState((current) => markClassroomInterrupted(current, "请求已取消"));
       } else if (error instanceof SSEInterruptedError) {
@@ -124,6 +165,7 @@ export default function ClassroomPage() {
             <option value="assistant">还是不懂：助教回答</option>
             <option value="ack">好的：等待用户</option>
             <option value="stop">结束讨论：结束课堂</option>
+            <option value="whiteboard">白板动作与重复去重</option>
             <option value="service-error">服务错误</option>
             <option value="interrupted">无终结事件断线</option>
           </select>
@@ -195,7 +237,49 @@ export default function ClassroomPage() {
             本轮角色数：{state.done.totalAgents}；动作数：{state.done.totalActions}
           </p>
         )}
+
+        {whiteboard.open && (
+          <section className="rounded-2xl border-2 border-slate-300 bg-slate-50 p-5 text-slate-900">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="font-semibold">Mock 白板</h2>
+              <span className="text-xs text-slate-500">1000 × 562 坐标系</span>
+            </div>
+            <div className="relative mt-4 aspect-[1000/562] overflow-hidden rounded-xl bg-white shadow-inner">
+              {whiteboard.elements.map((element) => (
+                <div
+                  className="absolute overflow-hidden rounded border border-blue-200 bg-blue-50 p-2"
+                  key={element.id}
+                  style={{
+                    color: element.color,
+                    fontSize: `${element.fontSize}px`,
+                    height: `${(element.height / 562) * 100}%`,
+                    left: `${(element.x / 1000) * 100}%`,
+                    top: `${(element.y / 562) * 100}%`,
+                    width: `${(element.width / 1000) * 100}%`,
+                  }}
+                >
+                  {element.content}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {actionResults.length > 0 && (
+          <section className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+            <h2 className="font-semibold">动作执行记录</h2>
+            <ul className="mt-2 space-y-1 text-sm">
+              {actionResults.map((result, index) => (
+                <li key={`${result.actionId}-${index}`}>
+                  {result.actionName} · {result.actionId} · {result.status}
+                  {result.reason ? ` · ${result.reason}` : ""}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
       </section>
+      <RequestDiagnostic diagnostic={diagnostic} />
     </main>
   );
 }

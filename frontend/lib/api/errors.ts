@@ -1,9 +1,11 @@
+import { redactSensitiveText } from "@/lib/security/redact";
+
 export class ApiError extends Error {
   constructor(
     message: string,
     public readonly status: number,
   ) {
-    super(message);
+    super(redactSensitiveText(message));
     this.name = "ApiError";
   }
 }

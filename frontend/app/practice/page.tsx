@@ -2,7 +2,12 @@
 
 import Link from "next/link";
 import { useRef, useState } from "react";
+import { RequestDiagnostic } from "@/components/request-diagnostic";
 import { ApiError } from "@/lib/api/errors";
+import {
+  diagnosticFromError,
+  type RequestDiagnostic as Diagnostic,
+} from "@/lib/diagnostics/request";
 import { generatePractice, practiceApiMode, submitPractice } from "@/lib/practice/client";
 import type {
   MockPracticeScenario,
@@ -25,6 +30,7 @@ export default function PracticePage() {
   const [submission, setSubmission] = useState<PracticeSubmission | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<"generate" | "submit" | null>(null);
+  const [diagnostic, setDiagnostic] = useState<Diagnostic | null>(null);
   const controllerRef = useRef<AbortController | null>(null);
 
   async function beginPractice() {
@@ -35,6 +41,7 @@ export default function PracticePage() {
     setAnswers({});
     setSubmission(null);
     setError(null);
+    setDiagnostic({ operation: "practice.generate", mode: practiceApiMode, status: "running" });
 
     try {
       const created = await generatePractice(
@@ -48,8 +55,10 @@ export default function PracticePage() {
         { signal: controller.signal, mockScenario: scenario },
       );
       setSession(created);
+      setDiagnostic({ operation: "practice.generate", mode: practiceApiMode, status: "completed" });
     } catch (caught) {
       setError(displayError(caught));
+      setDiagnostic(diagnosticFromError("practice.generate", practiceApiMode, caught));
     } finally {
       if (controllerRef.current === controller) {
         controllerRef.current = null;
@@ -70,6 +79,7 @@ export default function PracticePage() {
     controllerRef.current = controller;
     setLoading("submit");
     setError(null);
+    setDiagnostic({ operation: "practice.submit", mode: practiceApiMode, status: "running" });
 
     try {
       const result = await submitPractice(
@@ -83,8 +93,10 @@ export default function PracticePage() {
         { signal: controller.signal, mockScenario: scenario },
       );
       setSubmission(result);
+      setDiagnostic({ operation: "practice.submit", mode: practiceApiMode, status: "completed" });
     } catch (caught) {
       setError(displayError(caught));
+      setDiagnostic(diagnosticFromError("practice.submit", practiceApiMode, caught));
     } finally {
       if (controllerRef.current === controller) {
         controllerRef.current = null;
@@ -255,6 +267,7 @@ export default function PracticePage() {
           </p>
         </section>
       )}
+      <RequestDiagnostic diagnostic={diagnostic} />
     </main>
   );
 }

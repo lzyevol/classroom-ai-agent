@@ -2,9 +2,14 @@
 
 import Link from "next/link";
 import { FormEvent, useRef, useState } from "react";
+import { RequestDiagnostic } from "@/components/request-diagnostic";
 import { ApiError } from "@/lib/api/errors";
 import { apiMode, askQuestion } from "@/lib/api/qa-client";
 import type { MockQAScenario, QAResponse } from "@/lib/api/types";
+import {
+  diagnosticFromError,
+  type RequestDiagnostic as Diagnostic,
+} from "@/lib/diagnostics/request";
 
 export default function QAPage() {
   const [question, setQuestion] = useState("什么是具身智能？");
@@ -12,6 +17,7 @@ export default function QAPage() {
   const [response, setResponse] = useState<QAResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [diagnostic, setDiagnostic] = useState<Diagnostic | null>(null);
   const controllerRef = useRef<AbortController | null>(null);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -23,6 +29,7 @@ export default function QAPage() {
     setLoading(true);
     setError(null);
     setResponse(null);
+    setDiagnostic({ operation: "qa.ask", mode: apiMode, status: "running" });
 
     try {
       const result = await askQuestion({
@@ -31,7 +38,9 @@ export default function QAPage() {
         mockScenario: scenario,
       });
       setResponse(result);
+      setDiagnostic({ operation: "qa.ask", mode: apiMode, status: "completed" });
     } catch (requestError) {
+      setDiagnostic(diagnosticFromError("qa.ask", apiMode, requestError));
       if (requestError instanceof DOMException && requestError.name === "AbortError") {
         setError("请求已取消");
       } else if (requestError instanceof ApiError) {
@@ -172,6 +181,7 @@ export default function QAPage() {
           </>
         )}
       </section>
+      <RequestDiagnostic diagnostic={diagnostic} />
     </main>
   );
 }

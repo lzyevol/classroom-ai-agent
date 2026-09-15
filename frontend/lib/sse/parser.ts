@@ -25,7 +25,7 @@ function parseRecord(record: string): StatelessEvent | null {
   }
 
   if (!isStatelessEvent(parsed)) {
-    throw new SSEProtocolError("SSE 事件缺少受支持的 type 或对象 data");
+    throw new SSEProtocolError("SSE 事件类型或必要字段不符合课堂协议");
   }
 
   return parsed;

@@ -91,17 +91,65 @@ const eventTypes = new Set<StatelessEvent["type"]>([
   "error",
 ]);
 
-export function isStatelessEvent(value: unknown): value is StatelessEvent {
-  if (!value || typeof value !== "object") return false;
+function isObject(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
 
-  const candidate = value as { type?: unknown; data?: unknown };
-  return (
-    typeof candidate.type === "string" &&
-    eventTypes.has(candidate.type as StatelessEvent["type"]) &&
-    candidate.data !== null &&
-    typeof candidate.data === "object" &&
-    !Array.isArray(candidate.data)
-  );
+function isString(value: unknown): value is string {
+  return typeof value === "string";
+}
+
+function isOptionalString(value: unknown): value is string | undefined {
+  return value === undefined || isString(value);
+}
+
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+export function isStatelessEvent(value: unknown): value is StatelessEvent {
+  if (!isObject(value) || !isString(value.type) || !eventTypes.has(value.type as StatelessEvent["type"])) {
+    return false;
+  }
+  if (!isObject(value.data)) return false;
+  const data = value.data;
+
+  switch (value.type) {
+    case "agent_start":
+      return (
+        isString(data.messageId) &&
+        isString(data.agentId) &&
+        isString(data.agentName) &&
+        isOptionalString(data.agentAvatar) &&
+        isOptionalString(data.agentColor)
+      );
+    case "text_delta":
+      return isString(data.content) && isOptionalString(data.messageId);
+    case "agent_end":
+      return isString(data.messageId) && isString(data.agentId);
+    case "action":
+      return (
+        isString(data.actionId) &&
+        isString(data.actionName) &&
+        isObject(data.params) &&
+        isString(data.agentId) &&
+        isOptionalString(data.messageId)
+      );
+    case "thinking":
+      return true;
+    case "cue_user":
+      return isOptionalString(data.fromAgentId) && isOptionalString(data.prompt);
+    case "done":
+      return (
+        isFiniteNumber(data.totalActions) &&
+        isFiniteNumber(data.totalAgents) &&
+        isOptionalString(data.sessionStatus)
+      );
+    case "error":
+      return isString(data.message);
+    default:
+      return false;
+  }
 }
 
 export function isTerminalEvent(event: StatelessEvent): event is TerminalEvent {

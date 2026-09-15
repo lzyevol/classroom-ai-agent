@@ -1,5 +1,6 @@
 import { mockQANoEvidence, mockQASuccess } from "@/fixtures/qa/responses";
 import { ApiError, responseToApiError } from "@/lib/api/errors";
+import { parseQAResponse } from "@/lib/api/validate";
 import type {
   MockQAScenario,
   QAHistoryMessage,
@@ -80,5 +81,5 @@ export async function askQuestion({
     throw await responseToApiError(response, `问答请求失败（${response.status}）`);
   }
 
-  return (await response.json()) as QAResponse;
+  return parseQAResponse(await response.json());
 }

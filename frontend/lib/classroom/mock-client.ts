@@ -6,6 +6,7 @@ export type MockClassroomScenario =
   | "assistant"
   | "ack"
   | "stop"
+  | "whiteboard"
   | "service-error"
   | "interrupted";
 
@@ -34,6 +35,53 @@ const assistantEvents: StatelessEvent[] = [
   },
 ];
 
+const whiteboardEvents: StatelessEvent[] = [
+  {
+    type: "agent_start",
+    data: { messageId: "m-003", agentId: "default-1", agentName: "AI教师" },
+  },
+  {
+    type: "text_delta",
+    data: { messageId: "m-003", content: "我们在白板上画出感知与行动的闭环。" },
+  },
+  {
+    type: "action",
+    data: {
+      actionId: "action-open-001",
+      actionName: "wb_open",
+      params: {},
+      agentId: "default-1",
+      messageId: "m-003",
+    },
+  },
+  {
+    type: "action",
+    data: {
+      actionId: "action-text-001",
+      actionName: "wb_draw_text",
+      params: { content: "感知 → 决策 → 行动 → 环境反馈", x: 90, y: 80, fontSize: 26 },
+      agentId: "default-1",
+      messageId: "m-003",
+    },
+  },
+  {
+    type: "action",
+    data: {
+      actionId: "action-text-001",
+      actionName: "wb_draw_text",
+      params: { content: "这条重复动作不应再次执行", x: 90, y: 180 },
+      agentId: "default-1",
+      messageId: "m-003",
+    },
+  },
+  { type: "agent_end", data: { messageId: "m-003", agentId: "default-1" } },
+  { type: "cue_user", data: { prompt: "请观察这个闭环。" } },
+  {
+    type: "done",
+    data: { totalActions: 2, totalAgents: 1, sessionStatus: "waiting_for_user" },
+  },
+];
+
 function eventsForScenario(scenario: MockClassroomScenario): StatelessEvent[] {
   switch (scenario) {
     case "teacher":
@@ -55,6 +103,8 @@ function eventsForScenario(scenario: MockClassroomScenario): StatelessEvent[] {
           data: { totalActions: 0, totalAgents: 0, sessionStatus: "ended" },
         },
       ];
+    case "whiteboard":
+      return whiteboardEvents;
     case "service-error":
       return [classroomErrorEvent];
     case "interrupted":

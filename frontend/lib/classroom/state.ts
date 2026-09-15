@@ -3,6 +3,7 @@ import type {
   DoneEvent,
   StatelessEvent,
 } from "@/lib/sse/types";
+import { redactSensitiveText } from "@/lib/security/redact";
 
 export type ClassroomStatus =
   | "idle"
@@ -191,7 +192,7 @@ export function markClassroomInterrupted(
     ...state,
     status: "interrupted",
     currentMessageId: null,
-    error: message,
+    error: redactSensitiveText(message),
     messages: state.messages.map((classroomMessage) =>
       classroomMessage.status === "streaming"
         ? { ...classroomMessage, status: "interrupted" }
@@ -208,7 +209,7 @@ export function markClassroomFailed(
     ...state,
     status: "error",
     currentMessageId: null,
-    error: message,
+    error: redactSensitiveText(message),
     messages: state.messages.map((classroomMessage) =>
       classroomMessage.status === "streaming"
         ? { ...classroomMessage, status: "interrupted" }
