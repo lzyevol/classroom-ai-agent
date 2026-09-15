@@ -86,6 +86,15 @@ describe("课堂 SSE 解析器", () => {
     );
   });
 
+  it("已知事件缺少必要字段时也报告协议错误", async () => {
+    const invalid = new TextEncoder().encode(
+      'data: {"type":"text_delta","data":{"messageId":"m-1"}}\n\n',
+    );
+    await expect(collect(responseFromChunks([invalid]))).rejects.toThrow(
+      "SSE 事件类型或必要字段不符合课堂协议",
+    );
+  });
+
   it("AbortSignal 可以停止等待中的读取", async () => {
     let streamController: ReadableStreamDefaultController<Uint8Array> | undefined;
     const response = new Response(

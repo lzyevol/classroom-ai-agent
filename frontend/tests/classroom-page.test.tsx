@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import ClassroomPage from "@/app/classroom/page";
@@ -38,7 +38,7 @@ describe("智能课堂页面", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "SSE 连接在终结事件到达前中断",
     );
-    expect(screen.getByText("连接中断")).toBeInTheDocument();
+    expect(screen.getByText("连接中断", { selector: "span" })).toBeInTheDocument();
   });
 
   it("停止按钮通过 AbortSignal 取消消费", async () => {
@@ -54,5 +54,22 @@ describe("智能课堂页面", () => {
     if (screen.queryByRole("heading", { name: "AI教师" })) {
       expect(interruptedLabels).toHaveLength(1);
     }
+  });
+
+  it("校验并执行白板动作，同时记录重复 actionId", async () => {
+    const user = userEvent.setup();
+    render(<ClassroomPage />);
+
+    await user.selectOptions(screen.getByLabelText("Mock 场景"), "whiteboard");
+    await user.click(screen.getByRole("button", { name: "发送" }));
+
+    expect(await screen.findByRole("heading", { name: "Mock 白板" })).toBeInTheDocument();
+    expect(await screen.findByText("感知 → 决策 → 行动 → 环境反馈")).toBeInTheDocument();
+    expect(screen.queryByText("这条重复动作不应再次执行")).not.toBeInTheDocument();
+    expect(
+      await screen.findByText(/wb_draw_text · action-text-001 · duplicate/),
+    ).toBeInTheDocument();
+    const diagnostic = screen.getByLabelText("请求诊断");
+    expect(await within(diagnostic).findByText("请求完成")).toBeInTheDocument();
   });
 });

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import QAPage from "@/app/qa/page";
@@ -34,6 +34,7 @@ describe("教材问答页面", () => {
         signal: expect.any(AbortSignal),
       }),
     );
+    expect(within(screen.getByLabelText("请求诊断")).getByText("请求完成")).toBeInTheDocument();
   });
 
   it("证据不足时显示警告且不展示引用区", async () => {
@@ -61,6 +62,7 @@ describe("教材问答页面", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "模拟检索服务暂不可用（HTTP 503）",
     );
+    expect(within(screen.getByLabelText("请求诊断")).getByText("503")).toBeInTheDocument();
   });
 
   it("可以取消正在进行的请求", async () => {

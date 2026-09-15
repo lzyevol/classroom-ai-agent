@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import PracticePage from "@/app/practice/page";
@@ -69,6 +69,7 @@ describe("章节练习页面", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "模拟题库暂时不足，无法创建练习（HTTP 422）",
     );
+    expect(within(screen.getByLabelText("请求诊断")).getByText("422")).toBeInTheDocument();
   });
 
   it("可以取消正在创建的练习", async () => {
