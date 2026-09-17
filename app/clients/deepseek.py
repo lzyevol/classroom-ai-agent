@@ -17,8 +17,26 @@ KEYWORD_EXTRACT_PROMPT = (
 )
 
 
+class DeepSeekConfigError(RuntimeError):
+    """The model is not configured, so a request cannot be made at all.
+
+    Kept distinct from transient dependency failures so callers can give a
+    config-specific, locatable message instead of a generic outage.
+    """
+
+
+def _config_error_message() -> str:
+    return (
+        "未配置 DEEPSEEK_API_KEY：请在 .env 或环境变量中设置 DEEPSEEK_API_KEY"
+        "后重启后端服务"
+    )
+
+
 class DeepSeekClient:
     def __init__(self, api_key: str, base_url: str, model: str):
+        api_key = (api_key or "").strip()
+        if not api_key:
+            raise DeepSeekConfigError(_config_error_message())
         self.client = httpx.AsyncClient(
             base_url=base_url,
             headers={"Authorization": f"Bearer {api_key}"},
@@ -47,14 +65,20 @@ class DeepSeekClient:
                 resp.raise_for_status()
                 data = resp.json()
                 content = data["choices"][0]["message"]["content"]
-                return json.loads(content)
+                result = json.loads(content)
+                if not isinstance(result, dict):
+                    raise ValueError("answer response is not an object")
+                return result
             except (httpx.TimeoutException, httpx.HTTPStatusError) as e:
                 if attempt < 2:
                     continue
                 logger.warning("DeepSeek failed after retries: %s", type(e).__name__)
-                return {"answer": "AI 服务暂时不可用，请稍后再试。", "insufficient_evidence": True}
-            except (json.JSONDecodeError, KeyError):
-                return {"answer": "AI 返回格式异常，请稍后再试。", "insufficient_evidence": True}
+                # A model outage is a dependency failure, never "insufficient
+                # textbook evidence", so it must surface as a 503-style error.
+                raise RuntimeError("AI 服务暂时不可用，请稍后再试") from e
+            except (json.JSONDecodeError, KeyError, IndexError, TypeError, ValueError) as exc:
+                logger.warning("DeepSeek returned invalid answer JSON")
+                raise RuntimeError("AI 返回格式异常，请稍后再试") from exc
 
     async def generate_json(
         self,
@@ -102,7 +126,7 @@ class DeepSeekClient:
                     type(exc).__name__,
                 )
                 raise RuntimeError("AI 服务暂时不可用，请稍后再试") from exc
-            except (json.JSONDecodeError, KeyError, TypeError, ValueError) as exc:
+            except (json.JSONDecodeError, KeyError, IndexError, TypeError, ValueError) as exc:
                 logger.warning("DeepSeek returned invalid structured JSON")
                 raise RuntimeError("AI 返回格式异常，请稍后再试") from exc
 
@@ -141,6 +165,8 @@ class DeepSeekClient:
                 return result.get("keywords", [])
             return []
         except Exception:
+            # Keyword extraction is best-effort: retrieval falls back to the
+            # question text itself, so a failure here must not fail the request.
             return []
 
     async def close(self):

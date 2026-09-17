@@ -109,12 +109,13 @@ async def answer_question(request: QARequest) -> QAResponse:
     driver = get_driver()
     retriever = KnowledgeRetriever(driver)
 
-    client = DeepSeekClient(
-        settings.deepseek_api_key,
-        settings.deepseek_base_url,
-        settings.deepseek_model,
-    )
+    client: DeepSeekClient | None = None
     try:
+        client = DeepSeekClient(
+            settings.deepseek_api_key,
+            settings.deepseek_base_url,
+            settings.deepseek_model,
+        )
         history = [message.model_dump() for message in request.history]
         keywords = await client.extract_keywords(request.question, history)
         if not keywords:
@@ -191,4 +192,5 @@ async def answer_question(request: QARequest) -> QAResponse:
             insufficient_evidence=llm_result.get("insufficient_evidence", False),
         )
     finally:
-        await client.close()
+        if client is not None:
+            await client.close()

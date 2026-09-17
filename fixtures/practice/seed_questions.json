@@ -1,0 +1,200 @@
+{
+  "version": "1.0",
+  "note": "固定练习题库 seed 数据（B 负责维护）。每题引用 A 数据包 data/processed/chunks.jsonl 中的真实 chunk_id，quote 为 chunk 原文的逐字子串；章节信息由 seed 脚本从 chunk 记录读取，不在本文件重复维护。",
+  "questions": [
+    {
+      "section_key": "book_embodied_ai_intro_2024:1.1",
+      "source_chunk_id": "book_embodied_ai_intro_2024:1.1:chunk-001",
+      "type": "single_choice",
+      "stem": "根据教材，具身智能的核心含义是？",
+      "options": [
+        "身体本身的运动也可以影响（促进或者减弱）脑的发育与认知",
+        "大脑是智能形成的唯一来源",
+        "智能完全由外部环境决定，与身体无关",
+        "身体只是被动执行指令的载体"
+      ],
+      "correct_answer": "A",
+      "analysis": "教材指出，具身智能的核心含义是身体本身的运动也可以影响（促进或者减弱）脑的发育与认知。",
+      "difficulty": "easy",
+      "knowledge_point": "具身智能",
+      "quote": "具身智能，顾名思义就是“具备了身体的智能”"
+    },
+    {
+      "section_key": "book_embodied_ai_intro_2024:1.1",
+      "source_chunk_id": "book_embodied_ai_intro_2024:1.1:chunk-001",
+      "type": "single_choice",
+      "stem": "关于大脑与智能形成的关系，教材的观点是？",
+      "options": [
+        "大脑是智能形成的唯一来源",
+        "大脑并非智能的唯一来源，身体的结构、运动和感觉同样会直接影响智能的形成",
+        "智能完全由环境决定，与大脑无关",
+        "身体只是被动地执行指令"
+      ],
+      "correct_answer": "B",
+      "analysis": "教材强调，大脑对智能的形成具有重要作用，但并非唯一来源，身体的结构、运动和感觉同样直接影响智能的形成。",
+      "difficulty": "easy",
+      "knowledge_point": "具身智能",
+      "quote": "大脑并非智能的唯一来源，身体的结构、运动和感觉同样会直接影响智能的形成"
+    },
+    {
+      "section_key": "book_embodied_ai_intro_2024:1.1",
+      "source_chunk_id": "book_embodied_ai_intro_2024:1.1:chunk-001",
+      "type": "single_choice",
+      "stem": "教材用婴幼儿时期通过爬行、舔舐等动作促进大脑发育的例证，主要说明？",
+      "options": [
+        "身体与环境的交互动作可以促进大脑的发育",
+        "婴幼儿不需要感知与理解能力",
+        "智能只存在于成年阶段",
+        "大脑发育与身体运动无关"
+      ],
+      "correct_answer": "A",
+      "analysis": "教材以婴幼儿通过爬行、舔舐等身体与环境的交互动作促进大脑发育为例，说明身体对智能形成的重要性。",
+      "difficulty": "medium",
+      "knowledge_point": "具身智能",
+      "quote": "人在婴幼儿时期，并不具备很强的感知、理解能力，而需要通过爬行、舔舐等身体与环境的交互动作来促进大脑的发育"
+    },
+    {
+      "section_key": "book_embodied_ai_intro_2024:1.1",
+      "source_chunk_id": "book_embodied_ai_intro_2024:1.1:chunk-001",
+      "type": "single_choice",
+      "stem": "与强调身体作用的具身智能相对，忽略身体影响的智能技术被称为？",
+      "options": [
+        "符号智能",
+        "离身智能",
+        "通用智能",
+        "深度智能"
+      ],
+      "correct_answer": "B",
+      "analysis": "强调身体在智能体中的作用的研究被称为具身智能，而忽略身体影响的智能技术则称为离身智能。",
+      "difficulty": "medium",
+      "knowledge_point": "具身智能与离身智能",
+      "quote": "而前述忽略身体影响的智能技术，则称为“离身智能”"
+    },
+    {
+      "section_key": "book_embodied_ai_intro_2024:1.1",
+      "source_chunk_id": "book_embodied_ai_intro_2024:1.1:chunk-001",
+      "type": "single_choice",
+      "stem": "教材引用的经典人工智能著作中，对智能体的定义是？",
+      "options": [
+        "利用传感器感知环境，并可利用执行器影响环境",
+        "只进行符号推理和逻辑运算的机器",
+        "仅模拟大脑活动的神经网络程序",
+        "能够自主复制自身的系统"
+      ],
+      "correct_answer": "A",
+      "analysis": "教材引用经典人工智能著作，将智能体定义为“利用传感器感知环境，并可利用执行器影响环境”。",
+      "difficulty": "easy",
+      "knowledge_point": "智能体",
+      "quote": "对智能体的定义即为“利用传感器感知环境，并可利用执行器影响环境”"
+    },
+    {
+      "section_key": "book_embodied_ai_intro_2024:1.1",
+      "source_chunk_id": "book_embodied_ai_intro_2024:1.1:chunk-002",
+      "type": "true_false",
+      "stem": "具身智能广泛存在于植物、动物等生物体中。",
+      "options": ["正确", "错误"],
+      "correct_answer": true,
+      "analysis": "教材指出，具身智能广泛存在于植物、动物等生物体中，强调智能受脑、身体与环境协同影响。",
+      "difficulty": "easy",
+      "knowledge_point": "具身智能",
+      "quote": "具身智能广泛存在于植物、动物等生物体中"
+    },
+    {
+      "section_key": "book_embodied_ai_intro_2024:1.2",
+      "source_chunk_id": "book_embodied_ai_intro_2024:1.2:chunk-001",
+      "type": "single_choice",
+      "stem": "关于具身智能研究的历史，教材指出？",
+      "options": [
+        "具身智能的研究起源很早，但只有一段很短的历史",
+        "具身智能研究始于21世纪的大模型时代",
+        "具身智能研究完全独立于哲学与生理学",
+        "具身智能研究自起源以来从未中断"
+      ],
+      "correct_answer": "A",
+      "analysis": "教材指出，具身智能的研究虽然起源很早，但只有一段很短的历史。",
+      "difficulty": "easy",
+      "knowledge_point": "具身智能简史",
+      "quote": "具身智能的研究虽然起源很早，但只有一段很短的历史"
+    },
+    {
+      "section_key": "book_embodied_ai_intro_2024:1.2",
+      "source_chunk_id": "book_embodied_ai_intro_2024:1.2:chunk-001",
+      "type": "single_choice",
+      "stem": "在教材关于具身智能历史渊源的论述中，亚里士多德的观点是？",
+      "options": [
+        "支持身心分离的主张",
+        "身体具有感知－运动层面的主体性",
+        "大脑是认知的唯一来源",
+        "智能完全由环境决定"
+      ],
+      "correct_answer": "B",
+      "analysis": "教材指出，关于具身智能的研究可以上溯到古希腊时期亚里士多德关于身体具有感知－运动层面主体性的论述。",
+      "difficulty": "easy",
+      "knowledge_point": "具身智能简史",
+      "quote": "关于具身智能的研究可以上溯到古希腊时期亚里士多德（Aristotle）关于身体具有感知－运动层面的主体性的论述"
+    },
+    {
+      "section_key": "book_embodied_ai_intro_2024:1.2",
+      "source_chunk_id": "book_embodied_ai_intro_2024:1.2:chunk-002",
+      "type": "single_choice",
+      "stem": "根据教材，现代人工智能起源于？",
+      "options": [
+        "20世纪50年代的达特茅斯会议",
+        "20世纪90年代的深度学习浪潮",
+        "古希腊时期的哲学讨论",
+        "21世纪初的大模型研究"
+      ],
+      "correct_answer": "A",
+      "analysis": "教材指出，现代人工智能起源于20世纪50年代的达特茅斯会议。",
+      "difficulty": "medium",
+      "knowledge_point": "人工智能历史",
+      "quote": "现代人工智能起源于20世纪50年代的达特茅斯会议"
+    },
+    {
+      "section_key": "book_embodied_ai_intro_2024:1.2",
+      "source_chunk_id": "book_embodied_ai_intro_2024:1.2:chunk-002",
+      "type": "single_choice",
+      "stem": "教材提到，早期人工智能中“认知功能主要由脑完成，而身体仅具有输入输出机制”的强调大脑优先的观点，也被称为？",
+      "options": [
+        "联结主义",
+        "表示主义",
+        "行为主义",
+        "具身主义"
+      ],
+      "correct_answer": "B",
+      "analysis": "教材指出，强调大脑优先、侧重认知过程表示环节的观点，有时也被称为表示主义。",
+      "difficulty": "medium",
+      "knowledge_point": "表示主义",
+      "quote": "这类强调大脑优先的观点因其侧重关注认知过程的表示环节，有时也被称为表示主义"
+    },
+    {
+      "section_key": "book_embodied_ai_intro_2024:1.2",
+      "source_chunk_id": "book_embodied_ai_intro_2024:1.2:chunk-004",
+      "type": "single_choice",
+      "stem": "莫拉维克悖论指出？",
+      "options": [
+        "人类高级智慧需要巨大的计算资源，低等级智慧只需要很少的计算能力",
+        "对计算机而言，实现逻辑推理等人类高级智慧只需要相对很少的计算能力，而实现感知、运动等低等级智慧却需要巨大的计算资源",
+        "大脑是智能的唯一来源",
+        "具身智能无法用计算机实现"
+      ],
+      "correct_answer": "B",
+      "analysis": "莫拉维克悖论指出，对计算机而言，逻辑推理等高级智慧所需计算量很小，而感知、运动等低等级智慧却需要巨大的计算资源。",
+      "difficulty": "medium",
+      "knowledge_point": "莫拉维克悖论",
+      "quote": "莫拉维克悖论指出：和传统假设不同，对计算机而言，实现逻辑推理等人类高级智慧只需要相对很少的计算能力，而实现感知、运动等低等级智慧却需要巨大的计算资源"
+    },
+    {
+      "section_key": "book_embodied_ai_intro_2024:1.2",
+      "source_chunk_id": "book_embodied_ai_intro_2024:1.2:chunk-003",
+      "type": "true_false",
+      "stem": "符号主义面临的问题及其局限性催动了联结主义的发展。",
+      "options": ["正确", "错误"],
+      "correct_answer": true,
+      "analysis": "教材指出，符号主义面临的问题及体现出来的局限性催动了联结主义的发展，形成了神经网络等模型与方法。",
+      "difficulty": "easy",
+      "knowledge_point": "联结主义",
+      "quote": "符号主义面临的问题及体现出来的局限性催动了联结主义的发展"
+    }
+  ]
+}
