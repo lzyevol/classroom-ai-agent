@@ -32,7 +32,7 @@ BACKEND_URL=http://127.0.0.1:8100
 ```
 
 - `mock`：完全使用浏览器端固定 fixture，适合 C 独立开发和 L1 测试。
-- `real`：教材问答和练习经 `/backend` rewrite 访问 FastAPI。
+- `real`：教材问答和练习经 `/backend` rewrite 访问 FastAPI；练习仍需登录令牌和后端固定题库。
 - 课堂当前只有 Mock SSE；真实 `/api/chat` 必须等 B 提供合法请求 fixture 后接入，不能猜测 `classroomTurn`。
 
 当前 Mock 引用带有 `mock:` ID 和明确占位说明，不是教材原文。
@@ -52,9 +52,12 @@ corepack pnpm@10.28.0 lint
 corepack pnpm@10.28.0 test
 corepack pnpm@10.28.0 build
 corepack pnpm@10.28.0 test:e2e
+corepack pnpm@10.28.0 test:e2e:l2
 ```
 
 Playwright 会构建生产版本、启动 3100 端口，并在结束时清理本次启动的服务器。Windows 默认复用系统 Edge；其他环境需要安装 Playwright Chromium 或设置 `PLAYWRIGHT_CHANNEL`。
+
+`test:e2e:l2` 会额外启动 8101 端口的隔离 FastAPI 服务，验证 Next.js 代理和真实后端 schema。运行前需在仓库根目录创建 `.venv` 并安装 `requirements.txt`。该测试只替换 Neo4j/模型等外部依赖，不把结果计作真实模型 L3。
 
 ## 关键目录
 
@@ -71,6 +74,7 @@ lib/sse/              SSE 字节流解析与事件校验
 tests/                Vitest 单元和组件测试
 e2e/                  Playwright 真实浏览器测试
 scripts/run-e2e.mjs   浏览器测试服务器生命周期管理
+scripts/run-real-api-e2e.mjs  QA 跨服务 L2 生命周期管理
 ```
 
 ## 安全和职责边界

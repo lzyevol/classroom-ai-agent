@@ -57,7 +57,13 @@ for (const signal of handledSignals) {
 
 try {
   await waitForServer();
-  const runner = spawn(process.execPath, [playwrightCli, "test", ...process.argv.slice(2)], {
+  const runner = spawn(process.execPath, [
+    playwrightCli,
+    "test",
+    "e2e/core-flows.spec.ts",
+    "e2e/error-flows.spec.ts",
+    ...process.argv.slice(2),
+  ], {
     cwd: root,
     stdio: "inherit",
   });
