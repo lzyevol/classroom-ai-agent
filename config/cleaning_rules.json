@@ -1,0 +1,49 @@
+{
+  "version": "0.1.0",
+  "keep_block_labels": [
+    "doc_title",
+    "paragraph_title",
+    "text",
+    "content",
+    "display_formula",
+    "formula_number",
+    "table",
+    "algorithm",
+    "footnote"
+  ],
+  "drop_block_labels": [
+    "header",
+    "footer",
+    "number",
+    "header_image",
+    "footer_image"
+  ],
+  "image_block_labels": [
+    "image",
+    "chart",
+    "figure_title",
+    "vision_footnote"
+  ],
+  "protected_block_labels": [
+    "display_formula",
+    "formula_number",
+    "algorithm"
+  ],
+  "deterministic_replacements": {
+    "參考文献": "参考文献",
+    "恩考": "思考",
+    "引 言": "引言"
+  },
+  "manual_review_terms": [
+    "日系符号"
+  ],
+  "drop_exact_block_contents": [
+    "### 日系符号"
+  ],
+  "deepseek_policy": {
+    "enabled": false,
+    "mode": "review_only",
+    "overwrite_raw_text": false,
+    "require_change_log": true
+  }
+}

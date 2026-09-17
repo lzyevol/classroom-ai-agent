@@ -1,0 +1,45 @@
+{
+  "version": "0.1.0",
+  "entity_types": {
+    "Concept": "领域概念、理论、原理或现象",
+    "Agent": "生物、机器人或其他能够感知和行动的智能体",
+    "Environment": "智能体交互的物理、虚拟或仿真环境",
+    "Task": "具身智能任务或问题设定",
+    "Method": "解决问题的方法、技术或策略",
+    "ModelAlgorithm": "具有明确名称的模型、网络或算法",
+    "Platform": "仿真器、软件平台、机器人平台或系统",
+    "Dataset": "数据集、场景集或基准数据",
+    "Metric": "评价指标或度量",
+    "Component": "智能体、机器人或模型的组成部分",
+    "Capability": "感知、规划、学习、控制等能力",
+    "Experiment": "用于验证理论、方法或能力的实验"
+  },
+  "relation_types": {
+    "IS_A": "头实体是尾实体的一种",
+    "INSTANCE_OF": "头实体是尾实体的一个具体实例或例子",
+    "PART_OF": "头实体是尾实体的组成部分",
+    "USES": "头实体使用尾实体",
+    "APPLIED_TO": "头实体应用于尾实体",
+    "SOLVES": "头实体解决或用于解决尾实体",
+    "DEPENDS_ON": "头实体依赖尾实体",
+    "ENABLES": "头实体使尾实体成为可能或提供支撑",
+    "IMPROVES": "头实体改善尾实体",
+    "EVALUATED_BY": "头实体由尾实体评价",
+    "IMPLEMENTED_ON": "头实体在尾实体上实现或运行",
+    "COMPARED_WITH": "头实体与尾实体被明确比较",
+    "HAS_INPUT": "头实体以尾实体为输入",
+    "HAS_OUTPUT": "头实体产生尾实体作为输出"
+    ,"INTERACTS_WITH": "头实体与尾实体发生感知或物理交互",
+    "PERCEIVES": "头实体感知尾实体",
+    "ACTS_ON": "头实体对尾实体执行动作或产生物理作用",
+    "VALIDATES": "头实体通过实验或证据验证尾实体",
+    "HAS_PROPERTY": "头实体具有尾实体所表示的性质或能力"
+  },
+  "minimum_confidence": 0.75,
+  "evidence_policy": {
+    "must_be_verbatim_substring": true,
+    "max_evidence_chars": 220,
+    "reject_inferred_external_knowledge": true,
+    "require_entity_mention": true
+  }
+}
